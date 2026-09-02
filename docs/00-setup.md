@@ -23,6 +23,11 @@ source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[torch,dev]"
 ```
 
+Creating the venv normally takes a second or two. If it sits for more than a minute
+it is stuck bootstrapping pip, which happens now and then with Homebrew Python.
+Press Ctrl-C, run `rm -rf .venv`, and try again. Do not skip the delete: an
+interrupted venv has no `activate` script and no pip.
+
 The `torch` extra pulls in PyTorch and torchvision (a few hundred MB). Only Stage 1
 needs them. If the install is a problem on your machine, use `pip install -e ".[dev]"`
 and the Stage 1 tests will skip; come back to it when you can.
