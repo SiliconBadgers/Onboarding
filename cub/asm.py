@@ -37,17 +37,8 @@ def parse_line(line: str, lineno: int = 0) -> Instruction | None:
     if name not in OP_CODES:
         raise AsmError(lineno, f"unknown instruction '{parts[0]}'")
     fields: dict[str, int] = {}
-    # --- SOLUTION(stage=3): parse each 'key=value' operand into the fields dict ---
-    for part in parts[1:]:
-        if "=" not in part:
-            raise AsmError(lineno, f"expected key=value, got '{part}'")
-        key, value = part.split("=", 1)
-        key = key.lower()
-        try:
-            fields[key] = _parse_value(key, value)
-        except ValueError as e:
-            raise AsmError(lineno, str(e)) from e
-    # --- END SOLUTION ---
+    # TODO(onboard, stage 3): parse each 'key=value' operand into the fields dict
+    raise NotImplementedError("stage 3 blank, see asm.py:40")
     try:
         return Instruction(OP_CODES[name], fields)
     except ValueError as e:

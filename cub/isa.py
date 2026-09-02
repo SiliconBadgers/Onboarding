@@ -153,10 +153,8 @@ def encode(insn: Instruction) -> bytes:
     The result is the 128-bit integer converted to 16 little-endian bytes.
     """
     word = insn.op
-    # --- SOLUTION(stage=3): OR each field's value into the word at its bit position ---
-    for f in FIELDS[insn.op]:
-        word |= insn.fields[f.name] << f.lo
-    # --- END SOLUTION ---
+    # TODO(onboard, stage 3): OR each field's value into the word at its bit position
+    raise NotImplementedError("stage 3 blank, see isa.py:156")
     return word.to_bytes(INSN_BYTES, "little")
 
 

@@ -151,9 +151,7 @@ module cub_core #(
     // ---------------------------------------------------------------------------
     always_comb begin
         mac_sum_next = mac_sum;   // with the blank unfilled nothing accumulates
-        // --- SOLUTION(stage=8): multiply the activation and weight bytes as signed values and add the product to mac_sum ---
-        mac_sum_next = mac_sum + (spa_rdata * spw_rdata);
-        // --- END SOLUTION ---
+        // TODO(onboard, stage 8): multiply the activation and weight bytes as signed values and add the product to mac_sum
     end
 
     // ---------------------------------------------------------------------------
@@ -173,17 +171,7 @@ module cub_core #(
     always_comb begin
         relu_tmp = relu_in;
         relu_out = 8'sd0;         // with the blank unfilled every activation is zero
-        // --- SOLUTION(stage=8): ReLU when the relu flag is set, arithmetic shift right by the shift field, then saturate to [-128, 127] ---
-        if (f_flag8 && relu_in[31])
-            relu_tmp = 32'sd0;
-        relu_tmp = relu_tmp >>> f_r_shift[4:0];
-        if (relu_tmp > 32'sd127)
-            relu_out = 8'sd127;
-        else if (relu_tmp < -32'sd128)
-            relu_out = -8'sd128;
-        else
-            relu_out = relu_tmp[7:0];
-        // --- END SOLUTION ---
+        // TODO(onboard, stage 8): ReLU when the relu flag is set, arithmetic shift right by the shift field, then saturate to [-128, 127]
     end
 
     // ---------------------------------------------------------------------------

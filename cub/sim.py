@@ -138,25 +138,16 @@ class Machine:
         self._check_range("MATMUL SPAD_A", a, k, isa.SPAD_A_SIZE)
         self._check_range("MATMUL SPAD_W", w, n * k, isa.SPAD_W_SIZE)
         self._check_range("MATMUL ACC", acc, n, isa.ACC_SIZE)
-        # --- SOLUTION(stage=4): for each output row, dot the input vector with that row of the weight matrix and write (or add to) ACC. Use plain Python ints and wrap_i32 so the result wraps like hardware. ---
-        for row in range(n):
-            s = 0
-            for col in range(k):
-                s += int(self.spad_a[a + col]) * int(self.spad_w[w + row * k + col])
-            if accumulate:
-                s += int(self.acc[acc + row])
-            self.acc[acc + row] = wrap_i32(s)
-        # --- END SOLUTION ---
+        # TODO(onboard, stage 4): for each output row, dot the input vector with that row of the weight matrix and write (or add to) ACC. Use plain Python ints and wrap_i32 so the result wraps like hardware.
+        raise NotImplementedError("stage 4 blank, see sim.py:141")
         self.cycles += n * k
 
     def _exec_add_bias(self, insn: Instruction) -> None:
         acc, bias, count = insn["acc"], insn["bias"], insn["count"]
         self._check_range("ADD_BIAS ACC", acc, count, isa.ACC_SIZE)
         self._check_range("ADD_BIAS SPAD_B", bias, count, isa.SPAD_B_SIZE)
-        # --- SOLUTION(stage=4): add each bias into its accumulator, wrapping to INT32 ---
-        for i in range(count):
-            self.acc[acc + i] = wrap_i32(int(self.acc[acc + i]) + int(self.spad_b[bias + i]))
-        # --- END SOLUTION ---
+        # TODO(onboard, stage 4): add each bias into its accumulator, wrapping to INT32
+        raise NotImplementedError("stage 4 blank, see sim.py:156")
         self.cycles += count
 
     def _exec_relu(self, insn: Instruction) -> None:
@@ -165,14 +156,8 @@ class Machine:
         self._check_range("RELU SPAD_A", dst, count, isa.SPAD_A_SIZE)
         if shift > 31:
             raise SimError(f"RELU shift={shift} is out of range")
-        # --- SOLUTION(stage=4): ReLU (if the flag is set), arithmetic shift right, saturate to INT8, write to SPAD_A ---
-        for i in range(count):
-            v = int(self.acc[acc + i])
-            if relu:
-                v = max(v, 0)
-            v >>= shift              # Python's >> on a negative int is arithmetic
-            self.spad_a[dst + i] = clamp_i8(v)
-        # --- END SOLUTION ---
+        # TODO(onboard, stage 4): ReLU (if the flag is set), arithmetic shift right, saturate to INT8, write to SPAD_A
+        raise NotImplementedError("stage 4 blank, see sim.py:168")
         self.cycles += count
 
 

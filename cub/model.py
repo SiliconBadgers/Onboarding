@@ -45,10 +45,8 @@ if nn is not None:
         def forward(self, x):
             # x arrives as (N, 1, 28, 28) from the data loader, or (N, 784) already flat.
             x = x.reshape(x.shape[0], -1)
-            # --- SOLUTION(stage=1): fc1, then relu, then fc2. Return the logits. ---
-            x = torch.relu(self.fc1(x))
-            return self.fc2(x)
-            # --- END SOLUTION ---
+            # TODO(onboard, stage 1): fc1, then relu, then fc2. Return the logits.
+            raise NotImplementedError("stage 1 blank, see model.py:48")
 
 
 def load_float_weights(path: Path = FLOAT_NPZ) -> dict[str, np.ndarray]:

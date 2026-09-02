@@ -30,12 +30,8 @@ class SimBackend:
 def predict(prog: Program, pixels: np.ndarray, backend=None) -> tuple[int, np.ndarray]:
     """Classify one uint8 image (784,) -> (digit, real-valued logits)."""
     backend = backend or SimBackend()
-    # --- SOLUTION(stage=7): quantize the pixels, run the backend, dequantize with prog.output_scale, take argmax ---
-    x_q = quantize_input(pixels)
-    logits_q = backend.run(prog, x_q)
-    logits = logits_q.astype(np.float32) / prog.output_scale
-    digit = int(np.argmax(logits))
-    # --- END SOLUTION ---
+    # TODO(onboard, stage 7): quantize the pixels, run the backend, dequantize with prog.output_scale, take argmax
+    raise NotImplementedError("stage 7 blank, see runtime.py:33")
     return digit, logits
 
 

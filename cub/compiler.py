@@ -48,16 +48,8 @@ def compile_mlp(model: QuantModel) -> Program:
     for i, layer in enumerate(model.layers, start=1):
         n, k = layer.w.shape
         last = i == len(model.layers)
-        # --- SOLUTION(stage=6): emit LOAD w, LOAD b, MATMUL, ADD_BIAS, then RELU (or STORE for the last layer) ---
-        prog.insns.append(make("LOAD", mem=isa.MEM_SPAD_W, dram=dram[f"w{i}"].offset, spad=w_cursor, count=n * k))
-        prog.insns.append(make("LOAD", mem=isa.MEM_SPAD_B, dram=dram[f"b{i}"].offset, spad=b_cursor, count=n))
-        prog.insns.append(make("MATMUL", a=a_in, w=w_cursor, acc=0, n=n, k=k))
-        prog.insns.append(make("ADD_BIAS", acc=0, bias=b_cursor, count=n))
-        if last:
-            prog.insns.append(make("STORE", mem=isa.MEM_ACC, dram=dram["output"].offset, spad=0, count=n))
-        else:
-            prog.insns.append(make("RELU", acc=0, dst=SPAD_A_HIDDEN, count=n, shift=layer.shift, relu=int(layer.relu)))
-        # --- END SOLUTION ---
+        # TODO(onboard, stage 6): emit LOAD w, LOAD b, MATMUL, ADD_BIAS, then RELU (or STORE for the last layer)
+        raise NotImplementedError("stage 6 blank, see compiler.py:51")
         w_cursor += n * k
         b_cursor += n
         a_in = SPAD_A_HIDDEN
