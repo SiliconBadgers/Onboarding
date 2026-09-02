@@ -4,6 +4,7 @@ name: CI
 # blanks are untouched is skipped, not failed, so the job is green until you fill
 # something in wrong.
 on:
+  workflow_dispatch:
   push:
   pull_request:
 
