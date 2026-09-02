@@ -1,0 +1,23 @@
+[project]
+name = "cub"
+version = "1.0.0"
+description = "SiliconBadgers onboarding: an MNIST accelerator from PyTorch to FPGA"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.24"]
+
+[project.optional-dependencies]
+# torch is only needed for Stage 1 (and to retrain). Everything else is NumPy.
+torch = ["torch>=2.0", "torchvision>=0.15"]
+rtl = ["cocotb>=2.0"]
+dev = ["pytest>=7.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["cub*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"

@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+data/
+rtl/build/
+rtl/sim_build/
+results.xml
+*.vcd
+*.fst
+.DS_Store
+out.bin

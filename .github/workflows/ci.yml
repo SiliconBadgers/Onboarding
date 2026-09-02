@@ -1,0 +1,35 @@
+name: CI
+
+# Runs on every branch, including each onboardee's personal branch. A stage whose
+# blanks are untouched is skipped, not failed, so the job is green until you fill
+# something in wrong.
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[torch,dev]" --extra-index-url https://download.pytorch.org/whl/cpu
+      - name: Stage tests (0-7)
+        run: pytest -q --ignore=tests/test_08_rtl.py
+      - name: Progress
+        if: always()
+        run: python tools/progress.py
+
+  rtl:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: sudo apt-get update && sudo apt-get install -y iverilog
+      - run: pip install -e ".[rtl,dev]"
+      - name: RTL tests (stage 8)
+        run: pytest -q tests/test_08_rtl.py
