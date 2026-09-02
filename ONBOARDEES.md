@@ -4,4 +4,4 @@ Add yourself when you create your branch. One line per person, newest at the bot
 
 | Branch | Name | Started | Track | Mentor |
 |---|---|---|---|---|
-| `AdaLovelace` | Ada Lovelace (example row, delete me) | 2026-09-01 | hardware | — |
+| `BilalUsman` | BilalUsman | 2026-09-01 | hardware | — |
