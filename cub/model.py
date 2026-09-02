@@ -45,7 +45,9 @@ if nn is not None:
         def forward(self, x):
             # x arrives as (N, 1, 28, 28) from the data loader, or (N, 784) already flat.
             x = x.reshape(x.shape[0], -1)
-            # TODO(onboard, stage 1): fc1, then relu, then fc2. Return the logits.
+            x = self.fc2(torch.relu(self.fc1(x)))
+            return x
+
             raise NotImplementedError("stage 1 blank, see model.py:48")
 
 
