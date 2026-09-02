@@ -3,10 +3,7 @@ name: CI
 # Runs on every branch, including each onboardee's personal branch. A stage whose
 # blanks are untouched is skipped, not failed, so the job is green until you fill
 # something in wrong.
-on:
-  workflow_dispatch:
-  push:
-  pull_request:
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   python:
