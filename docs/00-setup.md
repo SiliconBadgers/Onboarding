@@ -19,9 +19,26 @@ You need Python 3.11 or newer.
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate          # Windows: .venv\Scripts\activate
+source .venv/bin/activate
 pip install -e ".[torch,dev]"
 ```
+
+On Windows the first two lines depend on your shell. There is usually no `python3`
+command, so use `python`. The venv's folder is `Scripts`, not `bin`, and only Git
+Bash has `source`.
+
+| Shell | Create | Activate |
+|---|---|---|
+| Command Prompt | `python -m venv .venv` | `.venv\Scripts\activate` |
+| PowerShell | `python -m venv .venv` | `.venv\Scripts\Activate.ps1` |
+| Git Bash | `python -m venv .venv` | `source .venv/Scripts/activate` |
+
+If PowerShell refuses to run the activate script, run
+`Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once and try again.
+
+Activation only affects the terminal window you run it in. Your prompt should
+start with `(.venv)` afterwards; if it does not, the later `pip` and `pytest`
+commands will use the wrong Python.
 
 Creating the venv normally takes a second or two. If it sits for more than a minute
 it is stuck bootstrapping pip, which happens now and then with Homebrew Python.
