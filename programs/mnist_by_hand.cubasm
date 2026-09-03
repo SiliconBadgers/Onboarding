@@ -23,8 +23,16 @@
 
 ; ---- layer 1: 784 -> 128, ReLU ----
 LOAD     mem=SPAD_A  dram=0x19340  spad=0  count=784
-; TODO(onboard, stage 5): load w1 and b1, MATMUL, ADD_BIAS, RELU into SPAD_A[1024] with shift 12
+LOAD     mem=SPAD_W  dram=0x00400  spad=0  count=100352
+LOAD     mem=SPAD_B  dram=0x18C00  spad=0  count=128
+MATMUL   a=0  w=0  acc=0  n=128  k=784
+ADD_BIAS acc=0  bias=0  count=128
+RELU     acc=0  dst=1024  count=128  shift=12
 
 ; ---- layer 2: 128 -> 10, logits ----
-; TODO(onboard, stage 5): load w2 and b2 after the layer-1 parameters, MATMUL from the hidden activations, ADD_BIAS, STORE the 10 INT32 logits to output
+LOAD     mem=SPAD_W  dram=0x18E00  spad=100352  count=1280
+LOAD   mem=SPAD_B  dram=0x19300  spad=128     count=10
+MATMUL   a=1024  w=100352  acc=0  n=10  k=128
+ADD_BIAS acc=0   bias=128  count=10
+STORE    mem=ACC  dram=0x19680  spad=0  count=10
 HALT
