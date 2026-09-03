@@ -33,10 +33,13 @@ def quantize_input(pixels: np.ndarray) -> np.ndarray:
     round to nearest, clamp to [-128, 127].
     """
     x = pixels.astype(np.float32) / 255.0
-    # TODO(onboard, stage 2): normalize, scale, round, clamp, cast to int8
-    raise NotImplementedError("stage 2 blank, see quant.py:36")
-    return q.astype(np.int8)
+    x = (x - MNIST_MEAN) / MNIST_STD
+    x = x * INPUT_SCALE
+    x = np.rint(x)
+    x = np.clip(x, -128, 127)
 
+    q = x.astype(np.int8)
+    return q
 
 def weight_scale(w: np.ndarray) -> float:
     """Per-tensor symmetric scale: the largest |w| maps to 127."""
@@ -46,8 +49,9 @@ def weight_scale(w: np.ndarray) -> float:
 def quantize_weights(w: np.ndarray) -> tuple[np.ndarray, float]:
     """float weights (out, in) -> (INT8 weights, scale)."""
     s = weight_scale(w)
-    # TODO(onboard, stage 2): scale, round, clamp, cast
-    raise NotImplementedError("stage 2 blank, see quant.py:52")
+    q = np.rint(w * s)
+    q = np.clip(q, -128, 127) 
+    q = q.astype(np.int8)
     return q, s
 
 
@@ -63,8 +67,11 @@ def choose_shift(acc_max: int) -> int:
     need that to be <= 127. Some rare inputs may exceed acc_max and saturate; that is
     what the clamp in RELU is for.
     """
-    # TODO(onboard, stage 2): the smallest shift such that (acc_max >> shift) <= 127
-    raise NotImplementedError("stage 2 blank, see quant.py:70")
+    shift = 0
+    while acc_max > 127:
+        acc_max >>= 1
+        shift += 1
+    return shift
 
 
 @dataclass
