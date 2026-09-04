@@ -65,14 +65,14 @@ element by element, and add up all 784 products. That single number is output 0.
 is a **dot product**: two arrays of the same length in, one number out.
 
 ```
-hidden[0] = image[0]*weights1[row 0][0] + image[1]*weights1[row 0][1] + ... + image[783]*weights1[row 0][783]
+layer1_output[0] = image[0]*weights1[row 0][0] + image[1]*weights1[row 0][1] + ... + image[783]*weights1[row 0][783]
 ```
 
-Now do the same with row 1 to get `hidden[1]`, row 2 to get `hidden[2]`, and so on —
-128 dot products, one per row.
+Now do the same with row 1 to get `layer1_output[1]`, row 2 for `layer1_output[2]`, and
+so on — 128 dot products, one per row.
 
 ```
-hidden[0 .. 127]
+layer1_output[0 .. 127]
 ```
 
 That is 100,352 multiplies and 100,352 additions, by far the bulk of the work, and it
@@ -81,29 +81,28 @@ does exactly this: one dot product per output row.
 
 ### Step 3 — add the biases
 
-`biases1` is an array of 128 numbers, one per output. Add them to `hidden` element by
-element.
+`biases1` is an array of 128 numbers, one per output. Add them to `layer1_output`
+element by element.
 
 ```
-hidden[i] = hidden[i] + biases1[i]        for i in 0 .. 127
+layer1_output[i] = layer1_output[i] + biases1[i]        for i in 0 .. 127
 ```
 
 128 additions. That is the whole operation, and it is the whole `ADD_BIAS` instruction.
 
 ### Step 4 — rectified linear
 
-Walk the `hidden` array and replace every negative number with zero. Leave everything
-else alone.
+Walk the `layer1_output` array and replace every negative number with zero. Leave
+everything else alone.
 
 ```
-if hidden[i] < 0: hidden[i] = 0           for i in 0 .. 127
+if layer1_output[i] < 0: layer1_output[i] = 0           for i in 0 .. 127
 ```
 
 Usually written "ReLU". In hardware it is a look at the sign bit.
 
-`hidden` is just a name for these 128 numbers. They are called *hidden* because nothing
-outside the network ever sees them — not the image, not the answer, only the
-intermediate result step 5 works from.
+Machine learning people call these 128 numbers the *hidden layer*, because nothing
+outside the network ever sees them.
 
 ### Step 5 — layer 2: 128 numbers in, 10 out
 
