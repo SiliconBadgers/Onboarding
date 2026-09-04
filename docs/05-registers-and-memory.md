@@ -3,8 +3,8 @@
 **Goal:** understand how anything gets *into* the chip, how the answer gets back *out*,
 and what all its memory is for.
 
-**Files to read:** `cub/runtime.py`, `rtl/tb/test_cub.py` (the `run_program` helper),
-and the port list at the top of `rtl/src/cub_core.sv`.
+**Files to read:** `python/runtime.py`, `rtl/test_cub.py` (the `run_program` helper),
+and the port list at the top of `rtl/cub_core.sv`.
 **Test:** `pytest tests/test_05_host_interface.py -v` (it already passes).
 
 ---
@@ -77,7 +77,7 @@ this once", not "stay in this state".
 
 ### Registers inside the chip
 
-The chip's own working state, declared together near the top of `rtl/src/cub_core.sv`:
+The chip's own working state, declared together near the top of `rtl/cub_core.sv`:
 
 | Register | What it holds |
 |---|---|
@@ -92,7 +92,7 @@ The chip's own working state, declared together near the top of `rtl/src/cub_cor
 The host sees none of these and does not need to. They exist because a state machine
 has to remember where it was between clock cycles.
 
-`cub/simulator.py` has the same registers in Python, but fewer, because Python's `for`
+`python/simulator.py` has the same registers in Python, but fewer, because Python's `for`
 loops keep the loop counters for it. Hardware has no `for` loop: every counter is a
 register you declare and increment yourself. That difference is most of what makes
 hardware feel strange at first.
@@ -178,7 +178,7 @@ host reads ten 32-bit numbers from main memory at 0x19680
 
 ## The host's four steps
 
-In `cub/runtime.py`, against the simulator:
+In `python/runtime.py`, against the simulator:
 
 ```python
 class SimulatorBackend:
@@ -190,7 +190,7 @@ class SimulatorBackend:
             machine.main_memory, program.regions["output"])
 ```
 
-And in `rtl/tb/test_cub.py`, against the state machine, one wire at a time:
+And in `rtl/test_cub.py`, against the state machine, one wire at a time:
 
 ```python
 dut.start.value = 1          # set the start bit
@@ -253,11 +253,11 @@ instruction set, which is the point of having one.
 
 ```bash
 pytest tests/test_05_host_interface.py -v
-python -m cub run --index 12
-python -m cub accuracy --count 500
+python -m python run --index 12
+python -m python accuracy --count 500
 ```
 
-- Comment out the divide by `output_scale` in `cub/runtime.py`. Does `predict` still
+- Comment out the divide by `output_scale` in `python/runtime.py`. Does `predict` still
   return the right digit? Why?
 - `LOAD` from the output region before the program has written it. What comes back?
 - Print `machine.program_counter` at the top of `step()` and run one image. Twelve

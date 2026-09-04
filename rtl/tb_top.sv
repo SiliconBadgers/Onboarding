@@ -3,7 +3,7 @@
 // cocotb drives clk, reset_n and start, and reaches the memory contents through the
 // hierarchy as tb_top.main_memory.storage[i]. Pass +MEMORY_HEX=<file> to preload the
 // memory with an image (one byte per line, as written by
-// `python -m cub memory-image`).
+// `python -m python memory-image`).
 
 `default_nettype none
 `timescale 1ns/1ps

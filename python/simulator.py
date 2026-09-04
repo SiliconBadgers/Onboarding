@@ -2,7 +2,7 @@
 
 It is deliberately written the slow, obvious way (loops, not vectorized NumPy) so it
 reads like the pseudocode in docs/02-instruction-set.md and like the SystemVerilog in
-rtl/src/cub_core.sv. Speed comes later, if ever.
+rtl/cub_core.sv. Speed comes later, if ever.
 
 This is the *golden model*: when the hardware disagrees with it, the hardware is wrong.
 """

@@ -3,8 +3,8 @@
 
 golden.npz is what every test compares against: the same 1000 images at every point
 in the stack, from decimal PyTorch logits to the whole-number logits the chip
-produces. Run this after retraining (python -m cub train) and recompiling
-(python -m cub compile).
+produces. Run this after retraining (python -m python train) and recompiling
+(python -m python compile).
 """
 
 from __future__ import annotations
@@ -17,10 +17,10 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from cub.compiler import compile_from_artifacts  # noqa: E402
-from cub.model import decimal_forward, load_test_images, load_trained_weights  # noqa: E402
-from cub.quantization import int8_forward, quantize_input  # noqa: E402
-from cub.runtime import SimulatorBackend  # noqa: E402
+from python.compiler import compile_from_artifacts  # noqa: E402
+from python.model import decimal_forward, load_test_images, load_trained_weights  # noqa: E402
+from python.quantization import int8_forward, quantize_input  # noqa: E402
+from python.runtime import SimulatorBackend  # noqa: E402
 
 
 def main() -> None:

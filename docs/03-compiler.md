@@ -3,7 +3,7 @@
 **Goal:** follow a trained PyTorch network into a list of instructions and a picture of
 memory, with nothing typed by hand.
 
-**Files to read:** `cub/quantization.py`, `cub/compiler.py`, `cub/program.py`.
+**Files to read:** `python/quantization.py`, `python/compiler.py`, `python/program.py`.
 **Test:** `pytest tests/test_03_compiler.py -v` (it already passes).
 
 ---
@@ -26,7 +26,7 @@ but its final step still looks like this.
 Run it:
 
 ```bash
-python -m cub compile
+python -m python compile
 ```
 
 ```
@@ -42,7 +42,7 @@ python -m cub compile
 
 ## Job 1: converting the numbers
 
-`cub/quantization.py`, and `quantize_model` in particular, is the whole of it:
+`python/quantization.py`, and `quantize_model` in particular, is the whole of it:
 
 ```python
 quantized_weights1, scale1 = quantize_weights(weights1)          # decimals -> 8-bit
@@ -151,7 +151,7 @@ One test requires the compiler's output to be **byte-identical** to the committe
 `artifacts/mnist.cub`; another runs it on the simulator against the golden answers. So:
 
 ```bash
-python -m cub compile && git status artifacts/
+python -m python compile && git status artifacts/
 ```
 
 should report nothing changed.

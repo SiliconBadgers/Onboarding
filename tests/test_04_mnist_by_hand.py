@@ -3,7 +3,7 @@
 import numpy as np
 import pytest
 
-from cub.stages import ROOT, skip_unless_started
+from python.stages import ROOT, skip_unless_started
 
 pytestmark = pytest.mark.stage(4)
 SOURCE = ROOT / "programs" / "mnist_by_hand.cubasm"
@@ -12,7 +12,7 @@ SOURCE = ROOT / "programs" / "mnist_by_hand.cubasm"
 @pytest.fixture(scope="module")
 def hand_written():
     skip_unless_started(4)
-    from cub.assembler import assemble
+    from python.assembler import assemble
 
     return assemble(SOURCE.read_text())
 
@@ -24,9 +24,9 @@ def test_ends_with_halt(hand_written):
 
 def test_runs_and_matches_golden(hand_written, compiled_program, golden):
     """Your instructions, the compiler's weights, and the same ten answers."""
-    from cub.instruction_set import encode
-    from cub.program import Program
-    from cub.simulator import Machine
+    from python.instruction_set import encode
+    from python.program import Program
+    from python.simulator import Machine
 
     code = b"".join(encode(i) for i in hand_written)
     for i in range(10):

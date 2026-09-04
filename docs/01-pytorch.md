@@ -3,7 +3,7 @@
 **Goal:** know which operations the chip must perform, and why every number ends up an
 integer.
 
-**Files to read:** `cub/model.py`, `cub/quantization.py`.
+**Files to read:** `python/model.py`, `python/quantization.py`.
 **Test:** `pytest tests/test_01_pytorch.py -v` (it already passes).
 
 ---
@@ -66,7 +66,7 @@ worth a circuit.
   folding into the weights before compiling. Ours does not.
 - **Convolutions.** A matrix multiply with more complicated indexing in front of it.
 
-`cub/model.py`'s `forward` is three lines, one per operation above.
+`python/model.py`'s `forward` is three lines, one per operation above.
 
 ---
 
@@ -158,17 +158,17 @@ the trade this entire field is built on.
 
 ## Things to try
 
-- In `cub/quantization.py`, make `quantize_input` use `np.floor` instead of `np.rint`.
+- In `python/quantization.py`, make `quantize_input` use `np.floor` instead of `np.rint`.
   Which test fails, and by how much?
 - Make `choose_shift` return one more than it does. Accuracy barely moves — why? Now
   one less. Why is that so much worse?
-- `python -c "from cub.quantization import accumulator_bits_needed as f; print(f(784))"`
+- `python -c "from python.quantization import accumulator_bits_needed as f; print(f(784))"`
   — what would happen with a 16-bit accumulator?
 
 ## Retraining (optional)
 
 ```bash
-python -m cub train
+python -m python train
 ```
 
 Three epochs take about a minute and reach roughly 97.3%. It overwrites everything in

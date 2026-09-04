@@ -1,6 +1,6 @@
 """Stage 6: the hardware must match the simulator, instruction by instruction and on MNIST.
 
-This drives the cocotb tests in rtl/tb/test_cub.py under Icarus Verilog. It skips if
+This drives the cocotb tests in rtl/test_cub.py under Icarus Verilog. It skips if
 the stage's blanks are untouched or if iverilog is not installed.
 """
 
@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from cub.stages import skip_unless_started
+from python.stages import skip_unless_started
 
 ROOT = Path(__file__).resolve().parents[1]
 RTL = ROOT / "rtl"
@@ -32,7 +32,7 @@ def test_hardware_matches_simulator():
     BUILD.mkdir(exist_ok=True)
     hex_path = BUILD / "main_memory.hex"
     if not hex_path.exists():
-        from cub.__main__ import main
+        from python.__main__ import main
 
         working_directory = os.getcwd()
         os.chdir(ROOT)
@@ -43,7 +43,7 @@ def test_hardware_matches_simulator():
 
     runner = get_runner("icarus")
     runner.build(
-        sources=[RTL / "src" / "cub_core.sv", RTL / "tb" / "tb_top.sv"],
+        sources=[RTL / "cub_core.sv", RTL / "tb_top.sv"],
         hdl_toplevel="tb_top",
         build_dir=BUILD / "sim_build",
         build_args=["-g2012"],
@@ -51,7 +51,7 @@ def test_hardware_matches_simulator():
         always=True,
     )
     # The runner builds the simulation's PYTHONPATH from this process's sys.path.
-    for path in (ROOT, RTL / "tb"):
+    for path in (ROOT, RTL):
         if str(path) not in sys.path:
             sys.path.insert(0, str(path))
     runner.test(
@@ -60,6 +60,6 @@ def test_hardware_matches_simulator():
         build_dir=BUILD / "sim_build",
         test_dir=BUILD,
         plusargs=[f"+MEMORY_HEX={hex_path}"],
-        extra_env={"CUB_MEMORY_HEX": str(hex_path)},
+        extra_env={"MEMORY_HEX_PATH": str(hex_path)},
         results_xml=str(BUILD / "results.xml"),
     )

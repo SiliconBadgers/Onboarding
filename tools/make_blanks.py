@@ -16,7 +16,7 @@ fails loudly rather than silently returning None. SystemVerilog (`//`) and assem
 (`;`) comments get only the TODO line, since neither has anything to raise.
 
 As it stands only Stage 4 (programs/mnist_by_hand.cubasm) and Stage 6
-(rtl/src/cub_core.sv) have solution blocks; the Python stages are for reading.
+(rtl/cub_core.sv) have solution blocks; the Python stages are for reading.
 
 Usage:
     tools/make_blanks.py --check           list every marker block (exit 1 if any exist)
@@ -33,7 +33,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
-from cub.stages import STAGES  # noqa: E402
+from python.stages import STAGES  # noqa: E402
 
 START = re.compile(r"^(?P<indent>\s*)(?P<c>#|//|;)\s*--- SOLUTION\(stage=(?P<stage>\d+)\)(?::\s*(?P<hint>.*?))?\s*---\s*$")
 END = re.compile(r"^\s*(#|//|;)\s*--- END SOLUTION ---\s*$")

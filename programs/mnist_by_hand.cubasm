@@ -15,7 +15,7 @@
 ; in BIAS_SCRATCHPAD and ACCUMULATORS. So count=128 into BIAS_SCRATCHPAD reads 512
 ; bytes of main memory, but count is still 128.
 ;
-; Main memory layout (printed by `python -m cub compile`):
+; Main memory layout (printed by `python -m python compile`):
 ;   weights1   0x00400   8-bit,  128 x 784, one row per output
 ;   biases1    0x18C00   32-bit, 128 values
 ;   weights2   0x18E00   8-bit,  10 x 128

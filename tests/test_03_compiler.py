@@ -8,15 +8,15 @@ pytestmark = pytest.mark.stage(3)
 
 @pytest.fixture(scope="module")
 def compiled():
-    from cub.compiler import compile_from_artifacts
+    from python.compiler import compile_from_artifacts
 
     return compile_from_artifacts()
 
 
 def test_quantization_matches_golden(golden):
     """The whole-number weights and biases the compiler works from."""
-    from cub.model import load_trained_weights
-    from cub.quantization import quantize_model
+    from python.model import load_trained_weights
+    from python.quantization import quantize_model
 
     weights = load_trained_weights()
     model = quantize_model(
@@ -56,7 +56,7 @@ def test_regions_do_not_overlap(compiled):
 
 
 def test_end_to_end_on_the_simulator(compiled, golden):
-    from cub.runtime import SimulatorBackend
+    from python.runtime import SimulatorBackend
 
     program, _ = compiled
     backend = SimulatorBackend()
@@ -66,7 +66,7 @@ def test_end_to_end_on_the_simulator(compiled, golden):
 
 
 def test_program_file_roundtrip(compiled, tmp_path):
-    from cub.program import Program
+    from python.program import Program
 
     program, _ = compiled
     program.save(tmp_path / "roundtrip.cub")

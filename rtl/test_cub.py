@@ -1,7 +1,7 @@
 """cocotb tests for cub_core (Stage 6).
 
 Every test builds a small memory image in Python, runs it on the Python simulator
-(cub.simulator.Machine) and on the hardware, and compares the two. The simulator is the
+(python.simulator.Machine) and on the hardware, and compares the two. The simulator is the
 golden model; the hardware has to match it bit for bit. There is no second copy of the
 expected answers to get wrong.
 
@@ -20,10 +20,10 @@ import numpy as np
 from cocotb.clock import Clock
 from cocotb.triggers import ClockCycles, RisingEdge
 
-from cub.assembler import assemble_bytes
-from cub.simulator import Machine
+from python.assembler import assemble_bytes
+from python.simulator import Machine
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = Path(__file__).resolve().parents[1]
 SCRATCH = 0x20000               # free main memory above the MNIST image
 MNIST_OUTPUT = 0x19680          # output region of artifacts/mnist.cub
 MNIST_INSTRUCTIONS = 0x400      # size of the instruction region
@@ -356,14 +356,14 @@ async def test_mnist_end_to_end(dut):
     """Run the compiled MNIST program on test image 0 and compare with the golden answer."""
     await reset(dut)
     hex_path = Path(
-        os.environ.get("CUB_MEMORY_HEX", ROOT / "rtl" / "build" / "main_memory.hex")
+        os.environ.get("MEMORY_HEX_PATH", ROOT / "rtl" / "build" / "main_memory.hex")
     )
     image_bytes = bytes(int(line, 16) for line in hex_path.read_text().split())
     # +MEMORY_HEX preloaded the bulk of the image at time 0. The directed tests above
     # overwrote the instruction region, so restore it and the input region here.
     write_memory(dut, 0, image_bytes[:MNIST_INSTRUCTIONS])
     golden = np.load(ROOT / "artifacts" / "golden.npz")
-    from cub.program import Program
+    from python.program import Program
 
     program = Program.load(ROOT / "artifacts" / "mnist.cub")
     input_region = program.regions["input"]

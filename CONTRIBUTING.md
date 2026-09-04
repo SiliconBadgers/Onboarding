@@ -35,7 +35,7 @@ Rules for a good blank:
 - The code around the blank must still parse with the block removed. Put setup and
   range checks before the marker and the return after it.
 - One idea per blank. If the solution is more than about ten lines, split it.
-- The blank's stage must match the file's stage in `cub/stages.py`, or the tests will
+- The blank's stage must match the file's stage in `python/stages.py`, or the tests will
   not know to skip it.
 
 There are deliberately only two stages with blanks — Stage 4 (assembly) and Stage 6
@@ -47,8 +47,8 @@ more active, add a "Things to try" item that breaks something, not a blank.
 
 1. Edit the code on `solutions`, with markers if the stage has blanks.
 2. Write or update the test in `tests/test_NN_*.py`. If the stage has blanks, call
-   `cub.stages.skip_unless_started(N)` first.
-3. Write the guide in `docs/NN-*.md` and register the stage in `cub/stages.py`.
+   `python.stages.skip_unless_started(N)` first.
+3. Write the guide in `docs/NN-*.md` and register the stage in `python/stages.py`.
 4. Run `pytest` on `solutions` (all pass), then `tools/make_blanks.py --apply` in a
    scratch copy and `pytest` again (all skip or pass, none fail).
 5. `tools/sync_main.sh` to regenerate `main`.
@@ -56,8 +56,8 @@ more active, add a "Things to try" item that breaks something, not a blank.
 ## Regenerating the artifacts
 
 ```bash
-python -m cub train      # trained_weights.{pt,npz}, mnist_test_1000.npz (needs PyTorch)
-python -m cub compile    # artifacts/mnist.cub
+python -m python train      # trained_weights.{pt,npz}, mnist_test_1000.npz (needs PyTorch)
+python -m python compile    # artifacts/mnist.cub
 python tools/make_golden.py   # artifacts/golden.npz
 ```
 

@@ -12,7 +12,7 @@ pytestmark = pytest.mark.stage(5)
 
 def test_input_region_round_trip(compiled_program, golden):
     """Writing the input region is how an image gets onto the chip."""
-    from cub.quantization import quantize_input
+    from python.quantization import quantize_input
 
     region = compiled_program.regions["input"]
     assert region.length == 784, "one byte per pixel"
@@ -27,8 +27,8 @@ def test_input_region_round_trip(compiled_program, golden):
 
 def test_output_region_holds_32_bit_logits(compiled_program, golden):
     """The program's last STORE leaves ten 32-bit values for the host to read."""
-    from cub.program import Program
-    from cub.simulator import Machine
+    from python.program import Program
+    from python.simulator import Machine
 
     region = compiled_program.regions["output"]
     assert region.length == 40, "ten values, four bytes each"
@@ -43,8 +43,8 @@ def test_output_region_holds_32_bit_logits(compiled_program, golden):
 
 def test_memory_spaces_have_the_documented_sizes():
     """The five memory spaces in docs/05-registers-and-memory.md."""
-    from cub import instruction_set
-    from cub.simulator import Machine
+    from python import instruction_set
+    from python.simulator import Machine
 
     machine = Machine()
     assert len(machine.main_memory) == instruction_set.MAIN_MEMORY_BYTES == 256 * 1024
@@ -60,7 +60,7 @@ def test_memory_spaces_have_the_documented_sizes():
 
 def test_scratchpads_only_hold_what_was_loaded():
     """There is no cache. If the program does not LOAD it, it is not there."""
-    from cub.simulator import Machine
+    from python.simulator import Machine
 
     machine = Machine()
     assert machine.weight_scratchpad.sum() == 0
@@ -68,7 +68,7 @@ def test_scratchpads_only_hold_what_was_loaded():
 
 
 def test_predict_matches_golden(compiled_program, golden):
-    from cub.runtime import predict
+    from python.runtime import predict
 
     for i in range(20):
         digit, logits = predict(compiled_program, golden["images"][i])
@@ -79,7 +79,7 @@ def test_predict_matches_golden(compiled_program, golden):
 
 
 def test_accuracy_on_the_simulator(compiled_program, golden):
-    from cub.runtime import predict
+    from python.runtime import predict
 
     count = 100
     correct = sum(
@@ -90,7 +90,7 @@ def test_accuracy_on_the_simulator(compiled_program, golden):
 
 
 def test_command_line_run(capsys):
-    from cub.__main__ import main
+    from python.__main__ import main
 
     main(["run", "--index", "0"])
     assert "predicted 7" in capsys.readouterr().out

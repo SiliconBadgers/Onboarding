@@ -106,14 +106,14 @@ correctness, but you should be able to explain any difference.
   100,352 times eight, so something was multiplied by the wrong thing.
 - **It runs but the answers are wrong.** Check layer 2's `index=` operands first —
   those are the ones that are not zero.
-- **Still stuck?** `python -m cub disassemble artifacts/mnist.cub` prints the
+- **Still stuck?** `python -m python disassemble artifacts/mnist.cub` prints the
   compiler's version; compare line by line. Try to find it yourself first.
 
 You can also assemble and read back your own file:
 
 ```bash
-python -m cub assemble programs/mnist_by_hand.cubasm -o /tmp/mine.bin
-python -m cub disassemble /tmp/mine.bin
+python -m python assemble programs/mnist_by_hand.cubasm -o /tmp/mine.bin
+python -m python disassemble /tmp/mine.bin
 ```
 
 ## Stretch: splitting a matrix multiply

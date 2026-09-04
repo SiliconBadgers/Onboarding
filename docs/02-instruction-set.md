@@ -3,7 +3,7 @@
 **Goal:** know every instruction, what each one does, and how each one is written
 down as sixteen bytes.
 
-**Files to read:** `cub/instruction_set.py`, `cub/assembler.py`, `cub/simulator.py`.
+**Files to read:** `python/instruction_set.py`, `python/assembler.py`, `python/simulator.py`.
 **Test:** `pytest tests/test_02_instruction_set.py -v` (it already passes).
 
 This document is the **specification**. The assembler, the simulator, the compiler and
@@ -223,8 +223,8 @@ Memory space codes, used by the `space` field: `0` activation, `1` weight, `2` b
 
 To place a value, shift it left by `low` and OR it in; to read it back, shift right by
 `low` and mask off the width. That is all `encode` and `decode` in
-`cub/instruction_set.py` do, and all the `wire` declarations at the top of
-`rtl/src/cub_core.sv` do. Unused bits must be zero.
+`python/instruction_set.py` do, and all the `wire` declarations at the top of
+`rtl/cub_core.sv` do. Unused bits must be zero.
 
 Field widths are sized against the largest thing they name: `index` and `count` are 24
 bits because the weight scratchpad has 131,072 elements, which does not fit in 16. That
@@ -260,10 +260,10 @@ RECTIFIED_LINEAR accumulator=0  destination=1024  count=128  shift=12
 HALT
 ```
 
-`cub/assembler.py` turns that text into instructions; `disassemble` goes back:
+`python/assembler.py` turns that text into instructions; `disassemble` goes back:
 
 ```bash
-python -m cub disassemble artifacts/mnist.cub
+python -m python disassemble artifacts/mnist.cub
 ```
 
 ## Strict simulator, lenient hardware
@@ -300,11 +300,11 @@ explain the cost of.
 
 ```bash
 printf 'MATRIX_MULTIPLY input=0 weights=0 accumulator=0 outputs=128 inputs=784\nHALT\n' > /tmp/try.cubasm
-python -m cub assemble /tmp/try.cubasm -o /tmp/try.bin && xxd /tmp/try.bin
+python -m python assemble /tmp/try.cubasm -o /tmp/try.bin && xxd /tmp/try.bin
 ```
 
 - Change one operand and watch which byte moves.
-- In `cub/instruction_set.py`, narrow `count` in `LOAD` from 24 bits to 16 and run the
+- In `python/instruction_set.py`, narrow `count` in `LOAD` from 24 bits to 16 and run the
   tests. What breaks first, and why is that a real limit rather than an arbitrary one?
 - Encode a `HALT` with bit 127 set. What does the simulator do? The hardware?
 

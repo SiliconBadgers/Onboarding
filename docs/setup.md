@@ -88,9 +88,9 @@ python tools/progress.py
 
 Ten minutes, no more:
 
-- `python -m cub run --index 3` classifies a test image on the simulator. It already
+- `python -m python run --index 3` classifies a test image on the simulator. It already
   works, because `artifacts/mnist.cub` was compiled by the finished pipeline.
-- `python -m cub disassemble artifacts/mnist.cub` prints the twelve instructions that
+- `python -m python disassemble artifacts/mnist.cub` prints the twelve instructions that
   classify a digit. You will write these yourself in Stage 4.
 - Skim [02-instruction-set.md](02-instruction-set.md) — just to see how short it is.
 

@@ -9,7 +9,7 @@ torch = pytest.importorskip("torch")
 
 @pytest.fixture(scope="module")
 def model():
-    from cub.model import TRAINED_WEIGHTS_TORCH, MultiLayerPerceptron
+    from python.model import TRAINED_WEIGHTS_TORCH, MultiLayerPerceptron
 
     network = MultiLayerPerceptron()
     network.load_state_dict(torch.load(TRAINED_WEIGHTS_TORCH))
@@ -25,7 +25,7 @@ def test_forward_shape(model):
 
 def test_matches_numpy_reference(model, golden):
     """The two layers and the rectified linear step, in PyTorch and in plain NumPy."""
-    from cub.quantization import MNIST_MEAN, MNIST_STANDARD_DEVIATION
+    from python.quantization import MNIST_MEAN, MNIST_STANDARD_DEVIATION
 
     images = (
         torch.tensor(golden["images"][:64]).float() / 255.0 - MNIST_MEAN
@@ -38,7 +38,7 @@ def test_matches_numpy_reference(model, golden):
 
 
 def test_accuracy(model, golden):
-    from cub.quantization import MNIST_MEAN, MNIST_STANDARD_DEVIATION
+    from python.quantization import MNIST_MEAN, MNIST_STANDARD_DEVIATION
 
     images = (
         torch.tensor(golden["images"]).float() / 255.0 - MNIST_MEAN
@@ -53,7 +53,7 @@ def test_accuracy(model, golden):
 
 
 def test_brightest_pixel_becomes_127():
-    from cub.quantization import quantize_input
+    from python.quantization import quantize_input
 
     quantized = quantize_input(np.array([0, 255], dtype=np.uint8))
     assert quantized.dtype == np.int8
@@ -63,7 +63,7 @@ def test_brightest_pixel_becomes_127():
 
 def test_quantize_weights_is_symmetric():
     """The largest magnitude in the tensor lands on 127, and zero stays zero."""
-    from cub.quantization import quantize_weights
+    from python.quantization import quantize_weights
 
     weights = np.array([[0.5, -1.0], [0.25, 0.0]], dtype=np.float32)
     quantized, scale = quantize_weights(weights)
@@ -74,7 +74,7 @@ def test_quantize_weights_is_symmetric():
 
 def test_choose_shift():
     """The smallest right shift that brings an accumulator peak back into 8 bits."""
-    from cub.quantization import choose_shift
+    from python.quantization import choose_shift
 
     assert choose_shift(127) == 0
     assert choose_shift(128) == 1
@@ -85,8 +85,8 @@ def test_choose_shift():
 
 def test_whole_number_accuracy(golden):
     """Whole-number inference loses almost nothing against the decimal network."""
-    from cub.model import load_trained_weights
-    from cub.quantization import int8_forward, quantize_input, quantize_model
+    from python.model import load_trained_weights
+    from python.quantization import int8_forward, quantize_input, quantize_model
 
     weights = load_trained_weights()
     quantized_model = quantize_model(
