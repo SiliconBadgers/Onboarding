@@ -41,46 +41,87 @@ prompt to an AI.
 > Show me the actual arithmetic on the 3x3 example, and give the shape of every weight
 > matrix and bias vector.
 
-## The network
+## The network, step by step
+
+Everything below is arrays of numbers. Nothing else.
+
+### Step 1 — flatten the image into an array
+
+The image is 28x28 grayscale pixels, each one a number from 0 (black) to 255 (white).
+Read the rows one after another into a single array of 784 numbers. The 2D shape is
+gone and never comes back; from here on it is just a list.
 
 ```
-image   784 numbers   the pixels of a 28x28 grayscale image, in one row
-layer 1 784 -> 128    y = (image  * weights1) + biases1
-        rectify       z = max(y, 0)
-layer 2 128 -> 10     scores = (z * weights2) + biases2
-        argmax        the digit is the position of the largest score
+image[0 .. 783]
 ```
 
-Four operations.
+### Step 2 — layer 1: 784 numbers in, 128 out
 
-### Weights — a matrix multiply
+`weights1` is an array of 128 x 784 = 100,352 numbers, laid out as 128 rows of 784 —
+one row per output.
 
-`weights1` is a table of 128 x 784 = 100,352 numbers. For each of the 128 outputs, walk
-down that output's row of 784 weights, multiply each by the matching pixel, and add the
-784 products. One output, one number.
-
-That is 100,352 multiplies and as many additions — by far the bulk of the work, and why
-`MATRIX_MULTIPLY` is the instruction the chip is built around.
-
-### Biases — an add
-
-`biases1` is 128 numbers, one per output. Add each to its output. 128 additions.
-
-### Rectified linear — a comparison against zero
-
-Usually written "ReLU". Replace negatives with zero, leave the rest alone:
+To produce output 0, take row 0 of `weights1` and the image array, multiply them
+element by element, and add up all 784 products. That single number is output 0. This
+is a **dot product**: two arrays of the same length in, one number out.
 
 ```
-if value < 0: value = 0
+layer1_output[0] = image[0]*weights1[row 0][0] + image[1]*weights1[row 0][1] + ... + image[783]*weights1[row 0][783]
 ```
 
-In hardware, a look at the sign bit.
+Now do the same with row 1 to get `layer1_output[1]`, row 2 for `layer1_output[2]`, and
+so on — 128 dot products, one per row.
 
-### Argmax — find the largest
+```
+layer1_output[0 .. 127]
+```
 
-The ten outputs are scores, one per digit; the largest wins. The chip does not do this
-— it hands back the ten numbers and the host compares them. Ten comparisons are not
-worth a circuit.
+That is 100,352 multiplies and 100,352 additions, by far the bulk of the work, and it
+is why `MATRIX_MULTIPLY` is the instruction the chip is built around. The instruction
+does exactly this: one dot product per output row.
+
+### Step 3 — add the biases
+
+`biases1` is an array of 128 numbers, one per output. Add them to `layer1_output`
+element by element.
+
+```
+layer1_output[i] = layer1_output[i] + biases1[i]        for i in 0 .. 127
+```
+
+128 additions. That is the whole operation, and it is the whole `ADD_BIAS` instruction.
+
+### Step 4 — rectified linear
+
+Walk the `layer1_output` array and replace every negative number with zero. Leave
+everything else alone.
+
+```
+if layer1_output[i] < 0: layer1_output[i] = 0           for i in 0 .. 127
+```
+
+Usually written "ReLU". In hardware it is a look at the sign bit.
+
+Machine learning people call these 128 numbers the *hidden layer*, because nothing
+outside the network ever sees them.
+
+### Step 5 — layer 2: 128 numbers in, 10 out
+
+Exactly steps 2 and 3 again, with different arrays. `weights2` is 10 rows of 128, so
+there are 10 dot products, each over 128 elements, and then 10 biases added on.
+
+```
+scores[0 .. 9]
+```
+
+Ten numbers, one per digit.
+
+### Step 6 — argmax
+
+Find the position of the largest number in `scores`. That position *is* the predicted
+digit: if `scores[7]` is the largest, the answer is 7.
+
+The chip does not do this step. It hands the ten numbers back and the host compares
+them — ten comparisons are not worth building a circuit for.
 
 ### Deliberately absent
 
@@ -90,7 +131,8 @@ worth a circuit.
   folding into the weights before compiling. Ours does not.
 - **Convolutions.** A matrix multiply with more complicated indexing in front of it.
 
-`python/model.py`'s `forward` is three lines, one per operation above.
+Open `python/model.py`. Its `forward` is three lines: step 1, then steps 2 to 4, then
+step 5.
 
 ---
 
