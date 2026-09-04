@@ -18,9 +18,7 @@ matrix multiply, rectified linear, and a couple of others. Every one of them abs
 down to plain addition and multiplication, and that is what the chip executes.
 
 If you are interested in learning how this machine learning stuff works, give this
-prompt to an AI and have it teach you. Keep the constraints: asked plainly, an AI will
-explain MNIST with convolutions, softmax and a training loop, none of which this
-project uses.
+prompt to an AI.
 
 > Explain how weights, biases, the first layer, the second layer, and ReLU work using
 > MNIST as an example. Start out with just explaining it on a 3x3 grid with a line
