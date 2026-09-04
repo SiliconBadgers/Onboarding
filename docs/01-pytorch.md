@@ -41,9 +41,18 @@ prompt to an AI.
 > Show me the actual arithmetic on the 3x3 example, and give the shape of every weight
 > matrix and bias vector.
 
-## The network, step by step
+## The network
 
-Everything below is arrays of numbers. Nothing else.
+```
+image   784 numbers   the pixels of a 28x28 grayscale image, in one row
+layer 1 784 -> 128    y = (image  * weights1) + biases1
+        rectify       z = max(y, 0)
+layer 2 128 -> 10     scores = (z * weights2) + biases2
+        argmax        the digit is the position of the largest score
+```
+
+Four operations. The rest of this section is the same thing again, one step at a time,
+as arrays of numbers. Nothing else.
 
 ### Step 1 — flatten the image into an array
 
