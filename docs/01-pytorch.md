@@ -44,12 +44,17 @@ prompt to an AI.
 ## The network
 
 ```
-input   784 numbers   (a 28x28 grayscale image, flattened into one row)
-layer 1 784 -> 128    hidden      = image  x  weights1 + biases1
-        rectify       hidden      = max(hidden, 0)
-layer 2 128 -> 10     ten_outputs = hidden x  weights2 + biases2
-        argmax        the digit is the position of the largest of the ten
+image   784 numbers   the pixels of a 28x28 grayscale image, in one row
+layer 1 784 -> 128    hidden = image  x weights1 + biases1
+        rectify       hidden = max(hidden, 0)
+layer 2 128 -> 10     scores = hidden x weights2 + biases2
+        argmax        the digit is the position of the largest score
 ```
+
+`hidden` is just a name for the 128 numbers layer 1 produces. They are called *hidden*
+because nothing outside the network ever sees them: they are not the image and not the
+answer, only the intermediate result layer 2 works from. `scores` is the ten numbers at
+the end, one per digit.
 
 Four operations.
 
