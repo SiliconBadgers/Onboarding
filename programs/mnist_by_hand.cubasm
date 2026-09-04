@@ -1,42 +1,51 @@
-; MNIST by hand (Stage 5).
+; MNIST by hand (Stage 4).
 ;
-; Write the whole MNIST program yourself, one instruction per line, using the DRAM
-; layout and scratchpad plan in docs/05-mnist-by-hand.md. The test assembles this
-; file, drops the instructions into the compiled image in place of the compiler's
-; own, and runs it on the simulator. If the logits match, you have written the same
-; program the compiler will write in Stage 6.
+; Write the whole MNIST program yourself, one instruction per line, using the numbers
+; below. The test assembles this file, drops the instructions into the compiled memory
+; image in place of the compiler's own, and runs it on the simulator. If the ten
+; results match, you have written the same program the compiler writes in Stage 3.
 ;
-; DRAM layout (from `python -m cub compile`):
-;   w1      0x00400   INT8  (128 x 784) row-major
-;   b1      0x18C00   INT32 x 128
-;   w2      0x18E00   INT8  (10 x 128)
-;   b2      0x19300   INT32 x 10
-;   input   0x19340   INT8  x 784
-;   output  0x19680   INT32 x 10
+; Read docs/04-mnist-by-hand.md first. The short version:
 ;
-; Scratchpad plan:
-;   SPAD_A: input at 0, hidden activations at 1024
-;   SPAD_W: w1 at 0, w2 right after it
-;   SPAD_B: b1 at 0, b2 right after it
-;   ACC:    always at 0
-;   layer-1 shift: 12
+;   memory=   a BYTE address in main memory (where the compiler put something)
+;   index=    an ELEMENT index inside a scratchpad (not a byte address)
+;   count=    how many ELEMENTS to move, never how many bytes
+;
+; Elements are one byte in ACTIVATION_SCRATCHPAD and WEIGHT_SCRATCHPAD and four bytes
+; in BIAS_SCRATCHPAD and ACCUMULATORS. So count=128 into BIAS_SCRATCHPAD reads 512
+; bytes of main memory, but count is still 128.
+;
+; Main memory layout (printed by `python -m cub compile`):
+;   weights1   0x00400   8-bit,  128 x 784, one row per output
+;   biases1    0x18C00   32-bit, 128 values
+;   weights2   0x18E00   8-bit,  10 x 128
+;   biases2    0x19300   32-bit, 10 values
+;   input      0x19340   8-bit,  784 values   (the host writes the image here)
+;   output     0x19680   32-bit, 10 values    (your last STORE writes the answer here)
+;
+; Scratchpad plan (yours to follow; the compiler uses the same one):
+;   ACTIVATION_SCRATCHPAD: input image at index 0, hidden activations at index 1024
+;   WEIGHT_SCRATCHPAD:     weights1 at index 0, weights2 right after it
+;   BIAS_SCRATCHPAD:       biases1 at index 0, biases2 right after it
+;   ACCUMULATORS:          always index 0
+;   layer-1 shift:         12
 
-; ---- layer 1: 784 -> 128, ReLU ----
-LOAD     mem=SPAD_A  dram=0x19340  spad=0  count=784
-; --- SOLUTION(stage=5): load w1 and b1, MATMUL, ADD_BIAS, RELU into SPAD_A[1024] with shift 12 ---
-LOAD     mem=SPAD_W  dram=0x400    spad=0  count=100352
-LOAD     mem=SPAD_B  dram=0x18C00  spad=0  count=128
-MATMUL   a=0  w=0  acc=0  n=128  k=784
-ADD_BIAS acc=0  bias=0  count=128
-RELU     acc=0  dst=1024  count=128  shift=12
+; ---- layer 1: 784 inputs -> 128 outputs, then rectified linear ----
+LOAD             space=ACTIVATION_SCRATCHPAD  memory=0x19340  index=0  count=784
+; --- SOLUTION(stage=4): load weights1 into WEIGHT_SCRATCHPAD index 0 (count = 128*784) and biases1 into BIAS_SCRATCHPAD index 0 (count = 128); MATRIX_MULTIPLY the image at input=0 by those weights into accumulator=0 with outputs=128 inputs=784; ADD_BIAS those 128 accumulators; RECTIFIED_LINEAR them into ACTIVATION_SCRATCHPAD destination=1024 with shift=12 ---
+LOAD             space=WEIGHT_SCRATCHPAD  memory=0x400    index=0  count=100352
+LOAD             space=BIAS_SCRATCHPAD    memory=0x18C00  index=0  count=128
+MATRIX_MULTIPLY  input=0  weights=0  accumulator=0  outputs=128  inputs=784
+ADD_BIAS         accumulator=0  bias=0  count=128
+RECTIFIED_LINEAR accumulator=0  destination=1024  count=128  shift=12
 ; --- END SOLUTION ---
 
-; ---- layer 2: 128 -> 10, logits ----
-; --- SOLUTION(stage=5): load w2 and b2 after the layer-1 parameters, MATMUL from the hidden activations, ADD_BIAS, STORE the 10 INT32 logits to output ---
-LOAD     mem=SPAD_W  dram=0x18E00  spad=100352  count=1280
-LOAD     mem=SPAD_B  dram=0x19300  spad=128     count=10
-MATMUL   a=1024  w=100352  acc=0  n=10  k=128
-ADD_BIAS acc=0  bias=128  count=10
-STORE    mem=ACC  dram=0x19680  spad=0  count=10
+; ---- layer 2: 128 inputs -> 10 outputs, and those ten numbers are the answer ----
+; --- SOLUTION(stage=4): load weights2 and biases2 into the scratchpads *after* layer 1's, so their index= operands are 100352 and 128, not 0; MATRIX_MULTIPLY from input=1024 (the hidden activations) with outputs=10 inputs=128; ADD_BIAS; then STORE 10 elements from ACCUMULATORS index 0 to memory=0x19680 instead of a RECTIFIED_LINEAR, because the last layer's raw 32-bit accumulators are the answer ---
+LOAD             space=WEIGHT_SCRATCHPAD  memory=0x18E00  index=100352  count=1280
+LOAD             space=BIAS_SCRATCHPAD    memory=0x19300  index=128     count=10
+MATRIX_MULTIPLY  input=1024  weights=100352  accumulator=0  outputs=10  inputs=128
+ADD_BIAS         accumulator=0  bias=128  count=10
+STORE            space=ACCUMULATORS  memory=0x19680  index=0  count=10
 ; --- END SOLUTION ---
 HALT

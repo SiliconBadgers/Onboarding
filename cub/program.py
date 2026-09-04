@@ -1,4 +1,10 @@
-"""The DRAM image and the .cub file format (docs/isa.md section 6)."""
+"""The main-memory image and the .cub file format.
+
+A compiled program is not just instructions: it is a picture of everything that must
+be sitting in main memory before the core starts. Instructions live at address 0, the
+weights and biases after them, then a blank space for the input image and a blank
+space for the ten results.
+"""
 
 from __future__ import annotations
 
@@ -8,16 +14,18 @@ from pathlib import Path
 
 import numpy as np
 
-from . import ISA_VERSION, isa
-from .isa import Instruction, encode
+from . import INSTRUCTION_SET_VERSION, instruction_set
+from .instruction_set import Instruction, encode
 
 MAGIC = b"CUB1"
 HEADER_BYTES = 64
-ALIGN = 64
+ALIGNMENT = 64
 
 
 @dataclass
 class Region:
+    """A named span of the main-memory image."""
+
     offset: int
     length: int
 
@@ -28,9 +36,9 @@ class Region:
 
 @dataclass
 class Program:
-    """A list of instructions plus the DRAM image they expect to run against."""
+    """A list of instructions plus the main-memory image they expect to run against."""
 
-    insns: list[Instruction]
+    instructions: list[Instruction]
     image: bytearray
     regions: dict[str, Region] = field(default_factory=dict)
     output_scale: float = 1.0
@@ -44,8 +52,9 @@ class Program:
     def place(self, name: str, data: bytes | np.ndarray | int) -> Region:
         """Append a region to the image at the next 64-byte-aligned offset.
 
-        `data` may be bytes, a NumPy array (little-endian bytes are appended), or an
-        int meaning "reserve this many zero bytes" (used for the input and output).
+        `data` may be bytes, a NumPy array (its little-endian bytes are appended), or
+        an integer meaning "reserve this many zero bytes" (used for the input image
+        and the output logits, which the host fills in later).
         """
         if isinstance(data, int):
             raw = bytes(data)
@@ -53,44 +62,52 @@ class Program:
             raw = data.astype(data.dtype.newbyteorder("<")).tobytes()
         else:
             raw = bytes(data)
-        pad = (-len(self.image)) % ALIGN
-        self.image.extend(bytes(pad))
-        r = Region(len(self.image), len(raw))
+        padding = (-len(self.image)) % ALIGNMENT
+        self.image.extend(bytes(padding))
+        region = Region(len(self.image), len(raw))
         self.image.extend(raw)
-        self.regions[name] = r
-        return r
+        self.regions[name] = region
+        return region
 
     def finalize(self) -> None:
         """Write the encoded instructions into the image at offset 0."""
-        code = b"".join(encode(i) for i in self.insns)
-        r = self.regions.get("insns")
-        if r is None or r.length < len(code):
-            raise ValueError("reserve the 'insns' region (with place) before finalize()")
-        self.image[r.offset : r.offset + len(code)] = code
-        if len(self.image) > isa.DRAM_BYTES:
-            raise ValueError(f"image is {len(self.image)} bytes, DRAM is {isa.DRAM_BYTES}")
+        code = b"".join(encode(i) for i in self.instructions)
+        region = self.regions.get("instructions")
+        if region is None or region.length < len(code):
+            raise ValueError("reserve the 'instructions' region (with place) before finalize()")
+        self.image[region.offset : region.offset + len(code)] = code
+        if len(self.image) > instruction_set.MAIN_MEMORY_BYTES:
+            raise ValueError(
+                f"image is {len(self.image)} bytes, main memory is "
+                f"{instruction_set.MAIN_MEMORY_BYTES}"
+            )
 
     # --- host-side access -------------------------------------------------------
 
-    def write_input(self, x_q: np.ndarray) -> None:
-        r = self.regions["input"]
-        raw = x_q.astype(np.int8).tobytes()
-        if len(raw) != r.length:
-            raise ValueError(f"input is {len(raw)} bytes, region is {r.length}")
-        self.image[r.offset : r.end] = raw
+    def write_input(self, quantized_pixels: np.ndarray) -> None:
+        """Drop one quantized image into the input region of the memory picture."""
+        region = self.regions["input"]
+        raw = quantized_pixels.astype(np.int8).tobytes()
+        if len(raw) != region.length:
+            raise ValueError(f"input is {len(raw)} bytes, region is {region.length}")
+        self.image[region.offset : region.end] = raw
 
     @staticmethod
     def read_output(image: bytes | bytearray, region: Region) -> np.ndarray:
-        return np.frombuffer(bytes(image[region.offset : region.end]), dtype="<i4").astype(np.int32)
+        """Read the 32-bit results the program's final STORE left in memory."""
+        raw = bytes(image[region.offset : region.end])
+        return np.frombuffer(raw, dtype="<i4").astype(np.int32)
 
     # --- file format ------------------------------------------------------------
 
     def to_bytes(self) -> bytes:
-        inp, out = self.regions["input"], self.regions["output"]
+        input_region, output_region = self.regions["input"], self.regions["output"]
         header = struct.pack(
             "<4sIIIIIIIf",
-            MAGIC, ISA_VERSION, len(self.insns), len(self.image),
-            inp.offset, inp.length, out.offset, out.length, self.output_scale,
+            MAGIC, INSTRUCTION_SET_VERSION, len(self.instructions), len(self.image),
+            input_region.offset, input_region.length,
+            output_region.offset, output_region.length,
+            self.output_scale,
         )
         header += bytes(HEADER_BYTES - len(header))
         return header + bytes(self.image)
@@ -100,28 +117,32 @@ class Program:
 
     @classmethod
     def load(cls, path: str | Path) -> Program:
-        from .isa import decode
+        from .instruction_set import decode
 
         raw = Path(path).read_bytes()
-        magic, version, n_insns, image_len, in_off, in_len, out_off, out_len, scale = struct.unpack_from("<4sIIIIIIIf", raw)
+        (magic, version, instruction_count, image_length,
+         input_offset, input_length, output_offset, output_length,
+         scale) = struct.unpack_from("<4sIIIIIIIf", raw)
         if magic != MAGIC:
             raise ValueError(f"not a .cub file (magic {magic!r})")
-        if version != ISA_VERSION:
-            raise ValueError(f"ISA version {version}, expected {ISA_VERSION}")
-        image = bytearray(raw[HEADER_BYTES : HEADER_BYTES + image_len])
-        insns = [decode(bytes(image[i * 16 : i * 16 + 16])) for i in range(n_insns)]
+        if version != INSTRUCTION_SET_VERSION:
+            raise ValueError(f"instruction set version {version}, expected {INSTRUCTION_SET_VERSION}")
+        image = bytearray(raw[HEADER_BYTES : HEADER_BYTES + image_length])
+        instructions = [
+            decode(bytes(image[i * 16 : i * 16 + 16])) for i in range(instruction_count)
+        ]
         regions = {
-            "insns": Region(0, n_insns * 16),
-            "input": Region(in_off, in_len),
-            "output": Region(out_off, out_len),
+            "instructions": Region(0, instruction_count * 16),
+            "input": Region(input_offset, input_length),
+            "output": Region(output_offset, output_length),
         }
-        return cls(insns, image, regions, scale)
+        return cls(instructions, image, regions, scale)
 
-    def to_hex(self, pad_to: int = isa.DRAM_BYTES) -> str:
-        """One byte per line, for Verilog $readmemh. Used by the RTL testbench and the FPGA build.
+    def to_hex(self, pad_to: int = instruction_set.MAIN_MEMORY_BYTES) -> str:
+        """One byte per line, for SystemVerilog's $readmemh.
 
-        Padded with zeros to the full DRAM size so the memory is completely
-        initialized and $readmemh has nothing to warn about.
+        Used by the hardware testbench. Padded with zeros to the full main-memory size
+        so the memory is completely initialized and $readmemh has nothing to warn about.
         """
         data = bytes(self.image) + bytes(max(0, pad_to - len(self.image)))
-        return "\n".join(f"{b:02x}" for b in data) + "\n"
+        return "\n".join(f"{byte:02x}" for byte in data) + "\n"

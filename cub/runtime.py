@@ -1,8 +1,9 @@
-"""The host side (Stage 7): image in, digit out.
+"""The host side: image in, digit out (Stage 5).
 
 Everything the accelerator does not do lives here: normalizing and quantizing the
-image, loading the program, starting the core, and taking the argmax of the logits.
-The same code drives the simulator today and the FPGA later; only `backend` changes.
+image, writing it into main memory, telling the core to start, waiting for it to
+finish, and reading the answer back out. The same code drives the Python simulator
+today and could drive real hardware tomorrow; only `backend` changes.
 """
 
 from __future__ import annotations
@@ -12,30 +13,32 @@ from pathlib import Path
 import numpy as np
 
 from .program import Program
-from .quant import quantize_input
-from .sim import Machine
+from .quantization import quantize_input
+from .simulator import Machine
 
 
-class SimBackend:
-    """Runs a Program on the Python simulator."""
+class SimulatorBackend:
+    """Runs a Program on the Python simulator.
 
-    def run(self, prog: Program, x_q: np.ndarray) -> np.ndarray:
-        prog.write_input(x_q)
-        m = Machine(prog.image)
-        m.run()
-        self.last_machine = m
-        return Program.read_output(m.dram, prog.regions["output"])
+    This is the software stand-in for the four things a host does to real hardware:
+    write the memory image, write the input, set the start bit, poll the done bit.
+    """
+
+    def run(self, program: Program, quantized_pixels: np.ndarray) -> np.ndarray:
+        program.write_input(quantized_pixels)
+        machine = Machine(program.image)
+        machine.run()
+        self.last_machine = machine
+        return Program.read_output(machine.main_memory, program.regions["output"])
 
 
-def predict(prog: Program, pixels: np.ndarray, backend=None) -> tuple[int, np.ndarray]:
-    """Classify one uint8 image (784,) -> (digit, real-valued logits)."""
-    backend = backend or SimBackend()
-    # --- SOLUTION(stage=7): quantize the pixels, run the backend, dequantize with prog.output_scale, take argmax ---
-    x_q = quantize_input(pixels)
-    logits_q = backend.run(prog, x_q)
-    logits = logits_q.astype(np.float32) / prog.output_scale
+def predict(program: Program, pixels: np.ndarray, backend=None) -> tuple[int, np.ndarray]:
+    """Classify one 8-bit image (784,). Returns (digit, decimal-valued logits)."""
+    backend = backend or SimulatorBackend()
+    quantized_pixels = quantize_input(pixels)
+    quantized_logits = backend.run(program, quantized_pixels)
+    logits = quantized_logits.astype(np.float32) / program.output_scale
     digit = int(np.argmax(logits))
-    # --- END SOLUTION ---
     return digit, logits
 
 
@@ -43,7 +46,9 @@ def ascii_digit(pixels: np.ndarray) -> str:
     """A 28x28 image as text, for the terminal demo."""
     ramp = " .:-=+*#%@"
     rows = pixels.reshape(28, 28)
-    return "\n".join("".join(ramp[min(9, int(p) * 10 // 256)] for p in row) for row in rows)
+    return "\n".join(
+        "".join(ramp[min(9, int(pixel) * 10 // 256)] for pixel in row) for row in rows
+    )
 
 
 def load_program(path: str | Path = "artifacts/mnist.cub") -> Program:

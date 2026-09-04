@@ -14,13 +14,13 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -e ".[torch,dev]" --extra-index-url https://download.pytorch.org/whl/cpu
-      - name: Stage tests (0-7)
-        run: pytest -q --ignore=tests/test_08_rtl.py
+      - name: Stage tests (1-5)
+        run: pytest -q --ignore=tests/test_06_rtl.py
       - name: Progress
         if: always()
         run: python tools/progress.py
 
-  rtl:
+  hardware:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,5 +29,5 @@ jobs:
           python-version: "3.12"
       - run: sudo apt-get update && sudo apt-get install -y iverilog
       - run: pip install -e ".[rtl,dev]"
-      - name: RTL tests (stage 8)
-        run: pytest -q tests/test_08_rtl.py
+      - name: Hardware tests (stage 6)
+        run: pytest -q tests/test_06_rtl.py
