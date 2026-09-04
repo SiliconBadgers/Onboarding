@@ -1,28 +1,21 @@
 # SiliconBadgers Onboarding
 
-Welcome. Over the next few weeks you will follow one digit-recognizing neural network
-all the way down: from a PyTorch model, through a compiler that turns it into machine
-instructions, into a chip design written in SystemVerilog that executes those
-instructions. Six stages. Two of them ask you to write something; the other four ask
-you to read and understand something.
+Follow one digit-recognizing neural network from a PyTorch model, through a compiler,
+into a chip design in SystemVerilog. Six stages; you write code in two of them.
 
-## Before anything else: get access
+## Get access first
 
-This repository lives in the **SiliconBadgers** GitHub organization, and you have to be
-a member of the organization before you can clone it, push a branch, or open a pull
-request. Nothing in this guide works until that is done.
+You must be in the **SiliconBadgers** GitHub organization to clone or push.
 
-**Message Bilal Usman on Slack with your GitHub username or the email address on your
-GitHub account, and ask to be added to the SiliconBadgers organization.** You will get
-an invitation by email — accept it, and then continue with [docs/setup.md](docs/setup.md).
+**Message Bilal Usman on Slack with your GitHub username or email.** Accept the
+invitation, then go to [docs/setup.md](docs/setup.md).
 
 ---
 
-## The whole stack, in one page
+## The stack
 
-A neural network is a big pile of multiply-and-add. A chip that runs neural networks
-is a machine that does multiply-and-add very fast, and nothing else. Everything
-between those two sentences is what this repository is about.
+A neural network is a big pile of multiply-and-add. A chip that runs one is a machine
+that does multiply-and-add fast and nothing else.
 
 ```
    PyTorch model            2 layers of weights and biases, in decimal numbers
@@ -47,31 +40,28 @@ between those two sentences is what this repository is about.
 
 ### 1. The model
 
-The network is two fully connected layers: 784 pixels in, 128 hidden values, 10
-outputs, one per digit. Each layer multiplies its input by a matrix of **weights**,
-adds a vector of **biases**, and (for the first layer) zeroes anything negative — a
-**rectified linear** step. The largest of the ten final numbers is the answer.
+Two fully connected layers: 784 pixels in, 128 hidden values, 10 outputs. Each layer
+multiplies its input by a matrix of **weights**, adds **biases**, and (layer 1 only)
+zeroes anything negative — a **rectified linear** step. The largest of the ten outputs
+is the answer.
 
-**You do not need to understand why any of that recognizes digits.** That is machine
-learning, and it is somebody else's problem. What you need is the list of *operations*
-a network performs, because that list is exactly the list of things the chip has to be
-able to do. [Stage 1](docs/01-pytorch.md) is that list.
+**You do not need to understand why that recognizes digits.** You need the list of
+*operations*, because that is the list of things the chip must do.
+[Stage 1](docs/01-pytorch.md).
 
 ### 2. Whole numbers
 
-The trained weights are decimal numbers like `-0.0428`. Hardware would rather have
-whole numbers: an 8-bit multiply is one small circuit, a decimal multiply is a large
-one, and 8-bit weights take a quarter of the memory 32-bit decimals do. So the whole
-network is *scaled* — every tensor gets multiplied by a constant so that its largest
-value lands on 127, then rounded to the nearest whole number. The chip only ever sees
-integers. Google's Tensor Processing Unit does exactly this, for exactly these
-reasons. [Stage 1](docs/01-pytorch.md) covers it.
+Trained weights are decimals like `-0.0428`. Hardware prefers integers: an 8-bit
+multiply is one small circuit, and 8-bit weights take a quarter of the memory. So every
+tensor is scaled until its largest value lands on 127, then rounded. The chip never
+sees a decimal. Google's Tensor Processing Unit does the same thing for the same
+reasons. [Stage 1](docs/01-pytorch.md).
 
 ### 3. The instruction set
 
-An **instruction set architecture** is the contract between software and hardware: the
-complete list of operations a chip can perform, what each one does, and how each one
-is written down as bits. Ours has six instructions that do something:
+An **instruction set architecture** is the contract between software and hardware: what
+operations exist, what they do, and how they are written as bits. Ours has six that do
+something, plus `NO_OPERATION`:
 
 | Instruction | What it does |
 |---|---|
@@ -82,44 +72,35 @@ is written down as bits. Ours has six instructions that do something:
 | `RECTIFIED_LINEAR` | zero the negatives, scale back down to 8 bits |
 | `HALT` | stop |
 
-plus `NO_OPERATION`, which does nothing, for seven opcodes in total.
-
-That is the entire chip. It has no branches, no loops, no function calls. It reads one
-instruction, does it completely, and reads the next one — one at a time, in order,
-never overlapping. The complicated part of running a neural network is in the
-software: the compiler decides that a `MATRIX_MULTIPLY` with 128 outputs and 784
-inputs is what layer 1 needs, and the chip obediently performs 100,352 multiplies. All
-you have to understand is what the chip does with one instruction.
+That is the entire chip — no branches, no loops, no function calls. It reads one
+instruction, finishes it, reads the next. The complexity lives in software: the
+compiler decides layer 1 is one `MATRIX_MULTIPLY` with 128 outputs and 784 inputs, and
+the chip performs 100,352 multiplies without knowing why.
 [Stage 2](docs/02-instruction-set.md).
 
 ### 4. The compiler
 
-The compiler takes the whole-number model and produces two things: a list of
-instructions, and a picture of what main memory must contain before the chip starts —
-the weights, the biases, a blank space for the input image, and a blank space for the
-ten answers. It decides every address in that picture, and every operand of every
-instruction. [Stage 3](docs/03-compiler.md), and then you write the same program by
+Produces two things: the instructions, and a picture of what main memory must hold
+before the chip starts — weights, biases, a blank space for the image, a blank space
+for the answers. [Stage 3](docs/03-compiler.md); you then write the same program by
 hand in [Stage 4](docs/04-mnist-by-hand.md).
 
 ### 5. Talking to the chip
 
-The chip cannot reach out and take an image from you. Everything it knows arrives
-through **registers** and **memory**: the host writes the memory image, writes the
-image to classify, sets a start bit, waits for a done bit, and reads ten numbers back
-out. Inside the chip there are more registers — the program counter, the instruction
-register, 256 accumulators, four scratchpads. Every instruction is a rule for moving
-numbers between them. [Stage 5](docs/05-registers-and-memory.md).
+The chip cannot reach out and take an image from you. Everything arrives through
+**registers** and **memory**: the host writes the image, sets a start bit, waits for a
+done bit, reads ten numbers back. Inside are more registers — program counter,
+instruction register, 256 accumulators, four scratchpads — and every instruction is a
+rule for moving numbers between them. [Stage 5](docs/05-registers-and-memory.md).
 
 ### 6. The hardware
 
-Finally, the SystemVerilog that actually does all this. It is smaller than you expect:
-one state machine, four arrays, one multiplier. [Stage 6](docs/06-rtl.md).
+The SystemVerilog that does all this: one state machine, four arrays, one multiplier.
+[Stage 6](docs/06-rtl.md).
 
 ---
 
 ## The stages
-
-Read the guides in order. Everything is written to be read start to finish.
 
 | Stage | Guide | You will |
 |---|---|---|
@@ -128,17 +109,15 @@ Read the guides in order. Everything is written to be read start to finish.
 | 2 | [The instruction set](docs/02-instruction-set.md) | learn every instruction and how each one is encoded |
 | 3 | [The compiler](docs/03-compiler.md) | follow a trained network turning into a program |
 | 4 | [MNIST by hand](docs/04-mnist-by-hand.md) | **write** the whole program yourself, in assembly |
-| 5 | [Talking to the chip](docs/05-registers-and-memory.md) | see how data gets in and out through registers and memory |
-| 6 | [The hardware](docs/06-rtl.md) | **write** the two missing pieces of the SystemVerilog core |
+| 5 | [Talking to the chip](docs/05-registers-and-memory.md) | see how data gets in and out |
+| 6 | [The hardware](docs/06-rtl.md) | **write** the two missing pieces of the core |
 
-Stages 4 and 6 have blanks to fill in, marked `TODO(onboard, stage N)`. Every other
-stage is reading — its tests already pass, and they are there so you can change
-something, watch it break, and change it back.
+Read them in order. Stages 4 and 6 have blanks marked `TODO(onboard, stage N)`; the
+rest are reading, and their tests already pass.
 
-## How to navigate this repository
+## Repository layout
 
 ```
-README.md            you are here: the whole stack in one page
 docs/                one guide per stage, in reading order
   setup.md             access, clone, install, first test run
   01-pytorch.md        the network and whole numbers
@@ -174,30 +153,28 @@ artifacts/           the trained weights, the compiled program, the expected ans
 tools/               progress.py, and scripts the maintainers use
 ```
 
-Two files are worth knowing about specifically:
+Two files to know about:
 
 - **[docs/02-instruction-set.md](docs/02-instruction-set.md)** is the specification.
-  The assembler, the simulator, the compiler and the hardware are all written against
-  it. When two of them disagree, that file decides who is wrong.
-- **`artifacts/golden.npz`** holds 1000 test images together with the correct answer at
-  every step of the stack. Every test compares against it, which is why a mistake
-  anywhere shows up as a specific failing number rather than "the accuracy dropped".
+  The assembler, simulator, compiler and hardware are all written against it. When two
+  of them disagree, it decides who is wrong.
+- **`artifacts/golden.npz`** holds 1000 test images with the correct answer at every
+  step of the stack, so a mistake shows up as a specific wrong number rather than a
+  vague accuracy drop.
 
 ## Working on the track
 
-1. **Make your branch.** From `main`, create a branch named `FirstnameLastname` and
-   work only on that branch.
-2. **Fill in the blanks.** Search for `TODO(onboard, stage`. There are four: two in
-   Stage 4, in the assembly program, and two in Stage 6, in the SystemVerilog. The
-   comment above each one names every variable you need to touch.
-3. **Run the tests.** `pytest` runs everything. A stage you have not started is
-   *skipped*, not failed, so the suite is green from day one and only goes red when
-   something you wrote is wrong. `python tools/progress.py` prints where you are.
-4. **Push.** Continuous integration runs the same tests on every push to your branch.
-5. **Ask questions early and often.** The point of the track is to learn how the stack
-   fits together, not to prove you can do it alone.
+1. **Branch.** From `main`, create a branch named `FirstnameLastname`.
+2. **Fill in the blanks.** Search for `TODO(onboard, stage`. There are four: two in the
+   assembly program, two in the SystemVerilog. Each comment names the variables you
+   need.
+3. **Run the tests.** `pytest` runs everything; unstarted stages skip rather than fail.
+   `python tools/progress.py` prints where you are.
+4. **Push.** Continuous integration runs the same tests.
+5. **Ask questions early.** The point is to learn how the stack fits together, not to
+   do it alone.
 
-## Commands you will use
+## Commands
 
 ```bash
 pytest                                        # everything
@@ -209,5 +186,5 @@ python -m cub disassemble artifacts/mnist.cub # the twelve instructions, as text
 python -m cub compile                         # rebuild artifacts/mnist.cub
 python -m cub accuracy --count 200            # how often the simulator is right
 python -m cub memory-image                    # bake a test image into rtl/build/main_memory.hex
-make -C rtl                                   # the hardware tests, with waveforms available
+make -C rtl                                   # the hardware tests
 ```
