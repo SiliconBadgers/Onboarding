@@ -46,8 +46,8 @@ prompt to an AI.
 ```
 image   784 numbers   the pixels of a 28x28 grayscale image, in one row
 layer 1 784 -> 128    y = (image  * weights1) + biases1
-        rectify       y = max(y, 0)
-layer 2 128 -> 10     scores = (y * weights2) + biases2
+        rectify       z = max(y, 0)
+layer 2 128 -> 10     scores = (z * weights2) + biases2
         argmax        the digit is the position of the largest score
 ```
 
