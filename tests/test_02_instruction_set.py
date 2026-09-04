@@ -41,16 +41,16 @@ GOLDEN_ENCODINGS = [
 
 @pytest.mark.parametrize("text,hex_string", GOLDEN_ENCODINGS)
 def test_encode_golden(text, hex_string):
-    from cub.assembler import parse_line
-    from cub.instruction_set import encode
+    from python.assembler import parse_line
+    from python.instruction_set import encode
 
     assert encode(parse_line(text)).hex() == hex_string
 
 
 @pytest.mark.parametrize("text,hex_string", GOLDEN_ENCODINGS)
 def test_decode_roundtrip(text, hex_string):
-    from cub.assembler import format_instruction, parse_line
-    from cub.instruction_set import decode, encode
+    from python.assembler import format_instruction, parse_line
+    from python.instruction_set import decode, encode
 
     instruction = parse_line(text)
     assert decode(encode(instruction)) == instruction
@@ -59,7 +59,7 @@ def test_decode_roundtrip(text, hex_string):
 
 def test_strict_decode_rejects_junk():
     """A bit no operand claims is an error, so a bad encoding fails at the first fetch."""
-    from cub.instruction_set import decode
+    from python.instruction_set import decode
 
     raw = bytearray(16)
     raw[0] = 0xFF
@@ -73,7 +73,7 @@ def test_strict_decode_rejects_junk():
 
 
 def test_parse_line_operands():
-    from cub.assembler import parse_line
+    from python.assembler import parse_line
 
     instruction = parse_line(
         "  load  SPACE=activation_scratchpad  MEMORY=0x10 index=3 count=784 ; a comment"
@@ -85,7 +85,7 @@ def test_parse_line_operands():
 
 
 def test_parse_line_errors():
-    from cub.assembler import AssemblyError, parse_line
+    from python.assembler import AssemblyError, parse_line
 
     with pytest.raises(AssemblyError):
         parse_line("JUMP 0", 1)
@@ -99,8 +99,8 @@ def test_parse_line_errors():
 
 def test_disassemble_compiled_program(compiled_program):
     """The twelve instructions that classify a digit."""
-    from cub.assembler import disassemble
-    from cub.instruction_set import encode
+    from python.assembler import disassemble
+    from python.instruction_set import encode
 
     raw = b"".join(encode(i) for i in compiled_program.instructions)
     names = [line.split()[0] for line in disassemble(raw).splitlines()]
@@ -115,8 +115,8 @@ def test_disassemble_compiled_program(compiled_program):
 
 def run(assembly: str, data: dict[int, bytes] | None = None):
     """Assemble, place at address 0, drop `data` at the given addresses, run to HALT."""
-    from cub.assembler import assemble_bytes
-    from cub.simulator import Machine
+    from python.assembler import assemble_bytes
+    from python.simulator import Machine
 
     machine = Machine(bytearray(assemble_bytes(assembly)))
     for address, raw in (data or {}).items():
@@ -188,8 +188,8 @@ def test_matrix_multiply_accumulate_and_negatives():
 
 def test_matrix_multiply_wraps_at_32_bits():
     """Two inputs cannot overflow, so use accumulate to push a sum past the 32-bit limit."""
-    from cub.assembler import assemble_bytes
-    from cub.simulator import Machine
+    from python.assembler import assemble_bytes
+    from python.simulator import Machine
 
     machine = Machine(assemble_bytes("""
         LOAD            space=ACTIVATION_SCRATCHPAD memory=0x1000 index=0 count=1
@@ -230,8 +230,8 @@ def test_add_bias():
 ])
 def test_rectified_linear(shift, rectify, accumulators, expected):
     """Zero the negatives, shift right, saturate to 8 bits. Both edges, both signs."""
-    from cub.assembler import assemble_bytes
-    from cub.simulator import Machine
+    from python.assembler import assemble_bytes
+    from python.simulator import Machine
 
     count = len(accumulators)
     machine = Machine(assemble_bytes(
@@ -245,7 +245,7 @@ def test_rectified_linear(shift, rectify, accumulators, expected):
 
 def test_range_checks():
     """The simulator is strict on purpose: it exists to catch a bad program."""
-    from cub.simulator import SimulatorError
+    from python.simulator import SimulatorError
 
     with pytest.raises(SimulatorError):
         run("LOAD space=ACTIVATION_SCRATCHPAD memory=0 index=4000 count=100\nHALT")
@@ -256,7 +256,7 @@ def test_range_checks():
 
 
 def test_missing_halt():
-    from cub.simulator import SimulatorError
+    from python.simulator import SimulatorError
 
     with pytest.raises(SimulatorError):
         run("NO_OPERATION")
@@ -264,8 +264,8 @@ def test_missing_halt():
 
 def test_mnist_end_to_end_on_the_simulator(compiled_program, golden):
     """The compiled program on the simulator must reproduce the NumPy reference exactly."""
-    from cub.program import Program
-    from cub.simulator import Machine
+    from python.program import Program
+    from python.simulator import Machine
 
     for i in range(20):
         compiled_program.write_input(golden["quantized_pixels"][i])

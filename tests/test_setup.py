@@ -5,11 +5,11 @@ import pytest
 
 
 def test_imports():
-    import cub
-    import cub.assembler, cub.compiler, cub.instruction_set  # noqa: E401,F401
-    import cub.program, cub.quantization, cub.runtime, cub.simulator  # noqa: E401,F401
+    import python
+    import python.assembler, python.compiler, python.instruction_set  # noqa: E401,F401
+    import python.program, python.quantization, python.runtime, python.simulator  # noqa: E401,F401
 
-    assert cub.INSTRUCTION_SET_VERSION == 1
+    assert python.INSTRUCTION_SET_VERSION == 1
 
 
 def test_artifacts_present(golden, compiled_program):

@@ -3,7 +3,7 @@
 There is no graph and no intermediate representation. A network like this one is
 already a list of layers, and each layer becomes the same five instructions. The
 interesting decisions are *where* things live (the memory plan) and *what shift* each
-layer uses (already decided in cub/quantization.py). The compiler's job is to write
+layer uses (already decided in python/quantization.py). The compiler's job is to write
 those decisions down as instructions.
 """
 

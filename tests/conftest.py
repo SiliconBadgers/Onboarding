@@ -18,7 +18,7 @@ def golden():
 @pytest.fixture
 def compiled_program():
     """artifacts/mnist.cub, freshly loaded for each test (tests write inputs into it)."""
-    from cub.program import Program
+    from python.program import Program
 
     return Program.load(ROOT / "artifacts" / "mnist.cub")
 

@@ -115,7 +115,7 @@ module cub_core #(
     // ---------------------------------------------------------------------------
     // Instruction operands, sliced straight out of the instruction register.
     // The bit ranges are the same ones listed in docs/02-instruction-set.md and in
-    // cub/instruction_set.py. This is the whole of "decode".
+    // python/instruction_set.py. This is the whole of "decode".
     // ---------------------------------------------------------------------------
     wire logic [7:0]  opcode    = instruction[7:0];
     wire logic        flag_bit  = instruction[8];     // MATRIX_MULTIPLY.accumulate / RECTIFIED_LINEAR.rectify

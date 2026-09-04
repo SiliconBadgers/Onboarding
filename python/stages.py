@@ -23,7 +23,7 @@ STAGES: dict[int, tuple[str, str, tuple[str, ...]]] = {
     3: ("The compiler", "docs/03-compiler.md", ()),
     4: ("MNIST by hand", "docs/04-mnist-by-hand.md", ("programs/mnist_by_hand.cubasm",)),
     5: ("Talking to the chip", "docs/05-registers-and-memory.md", ()),
-    6: ("The hardware", "docs/06-rtl.md", ("rtl/src/cub_core.sv",)),
+    6: ("The chip", "docs/06-rtl.md", ("rtl/cub_core.sv",)),
 }
 
 TODO_PATTERN = re.compile(r"TODO\(onboard, stage (\d+)\)")

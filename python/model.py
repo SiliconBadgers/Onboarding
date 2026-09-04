@@ -7,7 +7,7 @@ one rectified linear step. No batch normalization, no dropout, no softmax. The h
 takes the argmax, and it does not need softmax because softmax never changes which
 output is largest.
 
-Retrain it with:   python -m cub train
+Retrain it with:   python -m python train
 """
 
 from __future__ import annotations

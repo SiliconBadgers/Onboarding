@@ -1,12 +1,12 @@
-# Stage 6 — The hardware
+# Stage 6 — The chip
 
 **Goal:** finish the chip and prove it computes exactly what the Python simulator
 computes.
 
-**File you edit:** `rtl/src/cub_core.sv`.
+**File you edit:** `rtl/cub_core.sv`.
 **Test:** `pytest tests/test_06_rtl.py -v`, or `make -C rtl`.
 **Read first:** [05-registers-and-memory.md](05-registers-and-memory.md), and
-`cub/simulator.py`.
+`python/simulator.py`.
 
 ---
 
@@ -38,14 +38,14 @@ Hardware bugs are expensive to find. A simulator is cheap and settles every ques
 about *what the answer should be* before you worry about *how many cycles it takes*. So:
 no hardware until there is something bit-exact to compare against.
 
-That is why the testbench is Python. It builds a program with `cub.assembler`, runs it
-on `cub.simulator.Machine`, runs the same bytes through the SystemVerilog, and compares
+That is why the testbench is Python. It builds a program with `python.assembler`, runs it
+on `python.simulator.Machine`, runs the same bytes through the SystemVerilog, and compares
 — no second copy of the expected answers to get wrong. [cocotb](https://www.cocotb.org/)
 is what lets Python drive a hardware simulation cycle by cycle.
 
 ## The whole chip is one state machine
 
-Read `rtl/src/cub_core.sv` top to bottom before touching it. Its nine states map onto
+Read `rtl/cub_core.sv` top to bottom before touching it. Its nine states map onto
 the simulator's methods one for one:
 
 | State | Simulator | What it does |
@@ -75,7 +75,7 @@ wire logic [15:0] field_multiply_inputs = instruction[103:88];
 wire logic [15:0] field_rectify_count   = instruction[63:48];
 ```
 
-`decode()` in `cub/instruction_set.py` shifts and masks the same ranges. The hardware
+`decode()` in `python/instruction_set.py` shifts and masks the same ranges. The hardware
 does not even need the shift — the wires come off those bit positions.
 
 ### Fetching is a shift register
@@ -198,7 +198,7 @@ of syntax errors.
 pytest tests/test_06_rtl.py -v
 ```
 
-This compiles the core with Icarus Verilog and runs `rtl/tb/test_cub.py`: directed
+This compiles the core with Icarus Verilog and runs `rtl/test_cub.py`: directed
 tests for every instruction against the simulator, then the whole MNIST program on one
 image against `artifacts/golden.npz`. A few seconds.
 

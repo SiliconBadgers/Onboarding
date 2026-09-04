@@ -1,4 +1,4 @@
-"""Command line: python -m cub <command>."""
+"""Command line: python -m python <command>."""
 
 from __future__ import annotations
 
@@ -92,7 +92,7 @@ def command_accuracy(args):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(prog="cub")
+    parser = argparse.ArgumentParser(prog="python")
     subcommands = parser.add_subparsers(dest="command", required=True)
 
     sub = subcommands.add_parser("train", help="retrain the network and rewrite artifacts/")
