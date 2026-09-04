@@ -1,8 +1,12 @@
-"""The onboarding stages, and which files each stage's blanks live in.
+"""The onboarding stages, and which file each stage's blanks live in.
 
 Used by the tests (to skip a stage whose blanks are untouched), by tools/progress.py
-(to print where an onboardee is), and by tools/make_blanks.py (to know which comment
-syntax a file uses).
+(to print where someone is), and by tools/make_blanks.py (to know which comment syntax
+a file uses).
+
+Only two stages have anything to fill in. The other four are reading stages: their
+tests check that the repository is intact and that the code does what the guide says
+it does, and they always run.
 """
 
 from __future__ import annotations
@@ -14,42 +18,28 @@ ROOT = Path(__file__).resolve().parent.parent
 
 # stage number -> (title, guide, files that contain that stage's blanks)
 STAGES: dict[int, tuple[str, str, tuple[str, ...]]] = {
-    0: ("Setup", "docs/00-setup.md", ()),
-    1: ("The PyTorch MLP", "docs/01-pytorch-mlp.md", ("cub/model.py",)),
-    2: ("Quantization", "docs/02-quantization.md", ("cub/quant.py",)),
-    3: ("Encoding and the assembler", "docs/03-encoding.md", ("cub/isa.py", "cub/asm.py")),
-    4: ("The simulator", "docs/04-simulator.md", ("cub/sim.py",)),
-    5: ("MNIST by hand", "docs/05-mnist-by-hand.md", ("programs/mnist_by_hand.cubasm",)),
-    6: ("The compiler", "docs/06-compiler.md", ("cub/compiler.py",)),
-    7: ("The runtime and the demo", "docs/07-runtime.md", ("cub/runtime.py",)),
-    8: ("RTL", "docs/08-rtl.md", ("rtl/src/cub_core.sv",)),
-    9: ("FPGA", "docs/09-fpga.md", ()),
+    1: ("PyTorch and whole numbers", "docs/01-pytorch.md", ()),
+    2: ("The instruction set", "docs/02-instruction-set.md", ()),
+    3: ("The compiler", "docs/03-compiler.md", ()),
+    4: ("MNIST by hand", "docs/04-mnist-by-hand.md", ("programs/mnist_by_hand.cubasm",)),
+    5: ("Talking to the chip", "docs/05-registers-and-memory.md", ()),
+    6: ("The hardware", "docs/06-rtl.md", ("rtl/src/cub_core.sv",)),
 }
 
-# A stage's tests exercise code from earlier stages too. If a prerequisite is unfilled
-# the later stage cannot be checked yet, so its tests skip rather than fail.
-DEPENDS: dict[int, tuple[int, ...]] = {
-    4: (3,),
-    5: (3, 4),
-    6: (2, 3, 4),
-    7: (2, 4),
-    8: (3, 4),
-}
-
-TODO_RE = re.compile(r"TODO\(onboard, stage (\d+)\)")
+TODO_PATTERN = re.compile(r"TODO\(onboard, stage (\d+)\)")
 
 
 def remaining_blanks(stage: int) -> list[tuple[str, int]]:
     """(file, line number) of every unfilled blank for a stage."""
     out = []
-    for rel in STAGES[stage][2]:
-        path = ROOT / rel
+    for relative_path in STAGES[stage][2]:
+        path = ROOT / relative_path
         if not path.exists():
             continue
-        for lineno, line in enumerate(path.read_text().splitlines(), start=1):
-            m = TODO_RE.search(line)
-            if m and int(m.group(1)) == stage:
-                out.append((rel, lineno))
+        for line_number, line in enumerate(path.read_text().splitlines(), start=1):
+            match = TODO_PATTERN.search(line)
+            if match and int(match.group(1)) == stage:
+                out.append((relative_path, line_number))
     return out
 
 
@@ -62,10 +52,7 @@ def skip_unless_started(stage: int) -> None:
     """Call at the top of a test: skips it while the stage's blanks are still there."""
     import pytest
 
-    for dep in DEPENDS.get(stage, ()):
-        if remaining_blanks(dep):
-            pytest.skip(f"stage {stage} needs stage {dep} first")
     blanks = remaining_blanks(stage)
     if blanks:
-        where = ", ".join(f"{f}:{n}" for f, n in blanks)
+        where = ", ".join(f"{path}:{line}" for path, line in blanks)
         pytest.skip(f"stage {stage} not started: fill in {where}")

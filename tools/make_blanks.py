@@ -3,17 +3,20 @@
 
 Maintainers write the full solution between marker comments:
 
-    # --- SOLUTION(stage=4): one-line hint shown to the onboardee ---
+    # --- SOLUTION(stage=6): one-line hint shown to the onboardee ---
     ...the real code...
     # --- END SOLUTION ---
 
 This tool replaces every such block with a single line at the same indentation:
 
-    # TODO(onboard, stage 4): one-line hint shown to the onboardee
+    # TODO(onboard, stage 6): one-line hint shown to the onboardee
 
 followed, in Python files, by a `raise NotImplementedError(...)` so the blank
-fails loudly rather than silently returning None. Verilog (`//`) and assembly (`;`)
-comments get only the TODO line.
+fails loudly rather than silently returning None. SystemVerilog (`//`) and assembly
+(`;`) comments get only the TODO line, since neither has anything to raise.
+
+As it stands only Stage 4 (programs/mnist_by_hand.cubasm) and Stage 6
+(rtl/src/cub_core.sv) have solution blocks; the Python stages are for reading.
 
 Usage:
     tools/make_blanks.py --check           list every marker block (exit 1 if any exist)

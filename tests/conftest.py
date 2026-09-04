@@ -10,9 +10,9 @@ sys.path.insert(0, str(ROOT))
 
 @pytest.fixture(scope="session")
 def golden():
-    """artifacts/golden.npz: 1000 test images with the expected result at every layer."""
-    with np.load(ROOT / "artifacts" / "golden.npz") as z:
-        return {k: z[k] for k in z.files}
+    """artifacts/golden.npz: 1000 test images with the expected result at every step."""
+    with np.load(ROOT / "artifacts" / "golden.npz") as archive:
+        return {k: archive[k] for k in archive.files}
 
 
 @pytest.fixture

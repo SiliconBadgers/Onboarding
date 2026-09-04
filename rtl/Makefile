@@ -1,10 +1,10 @@
-# Standalone cocotb flow for the Cub core. From the repo root:
+# Standalone cocotb flow for the accelerator core. From the repository root:
 #
 #     source .venv/bin/activate
-#     python -m cub hex -o rtl/build/dram.hex     # once, or after recompiling
+#     python -m cub memory-image -o rtl/build/main_memory.hex   # once, or after recompiling
 #     make -C rtl
 #
-# `pytest tests/test_08_rtl.py` runs the same tests through the cocotb Python runner.
+# `pytest tests/test_06_rtl.py` runs the same tests through cocotb's Python runner.
 
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
@@ -20,17 +20,17 @@ COCOTB_TEST_MODULES := test_cub
 
 COMPILE_ARGS += -g2012
 SIM_BUILD    := $(RTL_DIR)/build/sim_build
-PLUSARGS     += +DRAM_HEX=$(RTL_DIR)/build/dram.hex
+PLUSARGS     += +MEMORY_HEX=$(RTL_DIR)/build/main_memory.hex
 COCOTB_RESULTS_FILE := $(RTL_DIR)/build/results.xml
 
 export PYTHONPATH := $(ROOT):$(RTL_DIR)/tb:$(PYTHONPATH)
-export CUB_DRAM_HEX := $(RTL_DIR)/build/dram.hex
+export CUB_MEMORY_HEX := $(RTL_DIR)/build/main_memory.hex
 
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
-.PHONY: hex
-hex:
-	cd $(ROOT) && python -m cub hex -o rtl/build/dram.hex
+.PHONY: memory-image
+memory-image:
+	cd $(ROOT) && python -m cub memory-image -o rtl/build/main_memory.hex
 
 .PHONY: clean-all
 clean-all: clean

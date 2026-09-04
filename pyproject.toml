@@ -1,12 +1,12 @@
 [project]
 name = "cub"
 version = "1.0.0"
-description = "SiliconBadgers onboarding: an MNIST accelerator from PyTorch to FPGA"
+description = "SiliconBadgers onboarding: an MNIST accelerator from PyTorch to SystemVerilog"
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.24"]
 
 [project.optional-dependencies]
-# torch is only needed for Stage 1 (and to retrain). Everything else is NumPy.
+# PyTorch is only needed for Stage 1 (and to retrain). Everything else is NumPy.
 torch = ["torch>=2.0", "torchvision>=0.15"]
 rtl = ["cocotb>=2.0"]
 dev = ["pytest>=7.0"]

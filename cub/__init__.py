@@ -1,15 +1,15 @@
-"""Cub: the onboarding accelerator stack.
+"""The onboarding accelerator stack, in Python.
 
-Everything here is written against docs/isa.md. Read that first.
+Everything here is written against docs/02-instruction-set.md. Read that first.
 
-    cub.isa       instruction definitions, encode/decode         (Stage 3)
-    cub.asm       assembler and disassembler                     (Stage 3)
-    cub.sim       the ISA simulator                              (Stage 4)
-    cub.quant     float -> INT8 quantization                     (Stage 2)
-    cub.model     the PyTorch MLP and its training script        (Stage 1)
-    cub.program   the DRAM image and the .cub file format        (Stage 6)
-    cub.compiler  quantized weights -> Cub program               (Stage 6)
-    cub.runtime   host side: preprocess, run, argmax             (Stage 7)
+    cub.instruction_set   what an instruction is, and its 128-bit layout   (Stage 2)
+    cub.assembler         text <-> instructions                           (Stage 2)
+    cub.simulator         a software model of the chip                    (Stage 2)
+    cub.model             the PyTorch network and its training script     (Stage 1)
+    cub.quantization      decimal numbers -> whole numbers                (Stage 1/3)
+    cub.compiler          a quantized network -> a runnable program       (Stage 3)
+    cub.program           the main-memory image and the .cub file format  (Stage 3)
+    cub.runtime           the host side: quantize, run, read the answer   (Stage 5)
 """
 
-ISA_VERSION = 1
+INSTRUCTION_SET_VERSION = 1
