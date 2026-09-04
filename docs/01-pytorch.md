@@ -8,14 +8,19 @@ integer.
 
 ---
 
-## You do not need to understand machine learning
+## Most of you will not need the machine learning
 
-Nothing here requires knowing *why* a network recognizes digits, how it was trained, or
-what a gradient is.
+We do need some people who understand machine learning and PyTorch. But the majority of
+you will never need to know how any of it works in order to design the chip.
 
-What you need is the **list of operations** a network performs when it runs. That list
-is short, every item is school arithmetic, and it is the specification of what the chip
-must do.
+What you need is the **operations** the complicated machine learning breaks down into —
+matrix multiply, rectified linear, and a couple of others. Every one of them abstracts
+down to plain addition and multiplication, and that is what the chip executes.
+
+If you *do* want to understand the machine learning, ask an AI to walk you through how
+weights, biases, the first layer, the second layer, and the rectified linear step work
+on an MNIST-like example with a 16x16 grid. It is a good use of an hour, and it is not
+a prerequisite for anything here.
 
 ## The network
 
