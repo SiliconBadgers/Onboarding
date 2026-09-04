@@ -1,7 +1,8 @@
 # SiliconBadgers Onboarding
 
-Follow one digit-recognizing neural network from a PyTorch model, through a compiler,
-into a chip design in SystemVerilog. Six stages; you write code in two of them.
+This onboarding project will guide you into running a machine learning program on a
+chip. By the end you will hand it a 28x28 pixel image of a handwritten digit and get a
+prediction of that digit back. Six stages; you write code in two of them.
 
 ## Get access first
 
