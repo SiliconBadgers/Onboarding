@@ -17,10 +17,31 @@ What you need is the **operations** the complicated machine learning breaks down
 matrix multiply, rectified linear, and a couple of others. Every one of them abstracts
 down to plain addition and multiplication, and that is what the chip executes.
 
-If you *do* want to understand the machine learning, ask an AI to walk you through how
-weights, biases, the first layer, the second layer, and the rectified linear step work
-on an MNIST-like example with a 16x16 grid. It is a good use of an hour, and it is not
-a prerequisite for anything here.
+If you are interested in learning how this machine learning stuff works, give this
+prompt to an AI and have it teach you. Keep the constraints: asked plainly, an AI will
+explain MNIST with convolutions, softmax and a training loop, none of which this
+project uses.
+
+> Explain how weights, biases, the first layer, the second layer, and ReLU work using
+> MNIST as an example. Start out with just explaining it on a 3x3 grid with a line
+> going down the middle, and then explain it with MNIST. I have 0 knowledge about
+> machine learning, PyTorch, etc.
+>
+> Stay inside these constraints, because they are exactly what the project I am
+> learning uses:
+>
+> - Inference only. The weights and biases already exist. Do not explain training,
+>   backpropagation, gradients, loss functions or optimizers.
+> - Fully connected layers only. No convolutions and no pooling.
+> - Exactly two layers: 784 inputs (a 28x28 image flattened into one row), then 128,
+>   then 10 outputs — one score per digit.
+> - ReLU is the only activation function, and it appears only between the two layers.
+> - No softmax and no probabilities. The prediction is whichever of the 10 scores is
+>   largest.
+> - One image at a time. No batches.
+>
+> Show me the actual arithmetic on the 3x3 example, and give the shape of every weight
+> matrix and bias vector.
 
 ## The network
 
