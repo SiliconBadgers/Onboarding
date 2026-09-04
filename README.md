@@ -18,24 +18,18 @@ A neural network is a big pile of multiply-and-add. A chip that runs one is a ma
 that does multiply-and-add fast and nothing else.
 
 ```
-   PyTorch model            2 layers of weights and biases, in decimal numbers
+   PyTorch model              2 layers of weights and biases, in decimal numbers
         |
-        |  quantization     scale every decimal number onto a whole number
         v
-   whole-number model       the same network, in 8-bit and 32-bit integers
+   compiler                   scale the decimals to whole numbers, decide where
+   cub/compiler.py            everything lives in memory, emit 12 instructions
         |
-        |  compiler         choose where everything lives in memory,
-        v                   then emit instructions that move and multiply it
-   a program                12 instructions + one picture of memory
+        v
+   the chip                   executes those instructions, one at a time
+   rtl/src/cub_core.sv
         |
-        +----------------------------+
-        |                            |
-        v                            v
-   simulator (Python)          the chip (SystemVerilog)
-   cub/simulator.py            rtl/src/cub_core.sv
-        |                            |
-        v                            v
-      a digit  =================  the same digit, bit for bit
+        v
+      a digit
 ```
 
 ### 1. The model
