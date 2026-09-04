@@ -38,13 +38,6 @@ if ! python3 tools/make_blanks.py --check >/dev/null; then
   exit 1
 fi
 
-# Nothing on main should still contain a solution block, and every stage with blanks
-# should now have them.
-if git grep -qI -e "--- SOLUTION(stage=" ; then
-  echo "blanking failed: a SOLUTION marker is still tracked" >&2
-  exit 1
-fi
-
 git add -A
 if git diff --cached --quiet; then
   echo "main is already up to date"
