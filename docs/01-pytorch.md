@@ -4,8 +4,7 @@
 ReLU turn 784 pixels into one digit.
 
 You do not need to know where the weights and biases come from. They come from
-**training**, which happens once before any of this and which the chip never does. By
-the time the numbers reach you they are fixed, and all that is left is arithmetic.
+**training**, which happens once before any of this and which the chip never does.
 
 ## A 3x3 example, worked all the way through
 
