@@ -3,6 +3,10 @@
 **Goal:** know which operations the chip must perform, and how weights, biases and
 ReLU turn 784 pixels into one digit.
 
+You do not need to know where the weights and biases come from. They come from
+**training**, which happens once before any of this and which the chip never does. By
+the time the numbers reach you they are fixed, and all that is left is arithmetic.
+
 ## A 3x3 example, worked all the way through
 
 Say this is the image we are given:
