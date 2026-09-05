@@ -1,7 +1,7 @@
 # Stage 1 — PyTorch model
 
-**Goal:** know which operations the chip must perform, and why every number ends up an
-integer.
+**Goal:** know which operations the chip must perform, and how weights, biases and
+ReLU turn 784 pixels into one digit.
 
 ## A 3x3 example, worked all the way through
 
