@@ -34,13 +34,6 @@ that does multiply-and-add fast and nothing else.
    rtl/cub_core.sv
 ```
 
-Read it top to bottom and each box knows less than the one above it. The model is a pile
-of numbers that happens to recognize digits. The instruction set is the handful of things
-the chip can be told to do. The compiler rewrites the model using only those things, and
-works out where every number sits in memory. The chip is real circuitry that reads the
-result one instruction at a time and multiplies and adds, with no idea a digit is
-involved. Every step down trades knowing *why* for something a wire can actually do.
-
 ---
 
 ## The stages
