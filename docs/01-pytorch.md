@@ -13,10 +13,10 @@ Say this is the image we are given:
 [ 0 1 0 ]
 ```
 
-Looking at it, it seems to be a 1.
+Looking at it, it seems to be a vertical line.
 
-Now imagine our PyTorch model has seen 10,000 3x3 images that resemble the number one.
-The 1s would generally sit in the same-ish area, right? That is what a **weight** is: a
+Now imagine our PyTorch model has seen 10,000 3x3 images with a vertical line in them.
+The ink would generally sit in the same-ish area, right? That is what a **weight** is: a
 number saying how much a given pixel matters.
 
 ### Layer 1, filter one: the vertical line
