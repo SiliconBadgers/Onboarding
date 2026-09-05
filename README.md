@@ -23,15 +23,13 @@ that does multiply-and-add fast and nothing else.
         |
         v
    instruction set            the short list of operations the chip can do
-   docs/02-instruction-set.md
         |
         v
    compiler                   scale the decimals to whole numbers, decide where
-   python/compiler.py         everything lives in memory, emit 12 instructions
+                              everything lives in memory, emit 12 instructions
         |
         v
    the chip                   executes those instructions, one at a time
-   rtl/cub_core.sv
 ```
 
 ---
