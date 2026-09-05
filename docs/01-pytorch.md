@@ -101,6 +101,9 @@ A 1 needs a strong vertical line and is penalized by a horizontal bar on top:
 
 ```
 weights for "1": [ 2.0, -1.0 ]
+                   ^    ^
+                   |    how much I care about horizontal
+                   how much I care about vertical
 
 vertical:    5.0 * 2.0  = 10.0
 horizontal:  0.0 * -1.0 =  0.0
