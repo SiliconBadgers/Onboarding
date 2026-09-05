@@ -1,4 +1,4 @@
-# Stage 1 — PyTorch, and turning decimals into whole numbers
+# Stage 1 — PyTorch model
 
 **Goal:** know which operations the chip must perform, and why every number ends up an
 integer.
@@ -150,7 +150,7 @@ low, THEN it is a 1.
 ```
 784 pixels (input)   raw intensity values of the 28x28 grid
 layer 1 (784 -> 128) tests the 784 pixels against 128 basic feature filters — vertical
-                     lines, horizontal bars, curves. The rectify step, max(y, 0), zeros
+                     lines, horizontal bars, curves. The ReLU step, max(y, 0), zeros
                      out the non-matches, leaving 128 clean feature scores
 layer 2 (128 -> 10)  evaluates those 128 feature scores against a pattern for each digit
                      0-9, giving 10 whole-digit scores
