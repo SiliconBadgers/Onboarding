@@ -7,7 +7,14 @@
 
 ### Run QuestaSim/ModelSim
 
-## Mac Tutorial
+
+## Windows
+
+You can either download ModelSim on your device (recommended) or remote access. To download it, search up ModelSim download, go to the website and select the latest version, select ModelSim Standard Edition, and then select "Windows Software." Then download it and when you are running the installer ** make sure you select the starter edition.**
+<img width="1919" height="992" alt="image" src="https://github.com/user-attachments/assets/1725bee7-662f-45f9-b6d2-234a9bcd9f0a" />
+
+
+## Mac
 
 If you're on Mac you will have to remote access a CAE computer to get access to QuestaSim. Don't worry—it's pretty simple. Here's a [tutorial](https://mediaspace.wisc.edu/media/QuestaSim+for+Mac/1_u631yf90)!
 
